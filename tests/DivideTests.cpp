@@ -11,6 +11,39 @@
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Variable.hpp"
+#include "Oasis/Log.hpp"
+
+TEST_CASE("Symbolic Change Of Base" "[Divide][Symbolic][Log]"){
+    const Oasis::Variable x("x");
+    const Oasis::Variable y("y");
+    const Oasis::Variable z("z");
+    const Oasis::Variable q("q");
+    Oasis::Divide divG(Oasis::Log(z,x),Oasis::Log(z,y));
+    Oasis::Divide divB(Oasis::Log(x,z),Oasis::Log(y,q));
+    auto simplifiedG = divG.Simplify();
+    auto simplifiedB = divB.Simplify();
+    REQUIRE(simplifiedG != nullptr);
+    REQUIRE(simplifiedB != nullptr);
+    CAPTURE(simplifiedG->ToString());
+    REQUIRE(simplifiedG->Equals(Oasis::Log(y,x)));
+    REQUIRE(simplifiedB->Equals(divB));
+}
+
+// TEST_CASE("i over i Large Expression" "[Divide][Imaginary]"){
+//     const Oasis::Variable x("x");
+//     const Oasis::Variable y("y");
+//     const Oasis::Variable z("z");
+//     const Oasis::Variable q("q");
+//     Oasis::Divide divG(Oasis::Log(x,z),Oasis::Log(y,z));
+//     Oasis::Divide divB(Oasis::Log(x,z),Oasis::Log(y,q));
+//     auto simplifiedG = divG.Simplify();
+//     auto simplifiedB = divB.Simplify();
+//     REQUIRE(simplifiedG != nullptr);
+//     REQUIRE(simplifiedB != nullptr);
+//     REQUIRE(simplifiedG->Equals(Oasis::Log(x,y)));
+//     REQUIRE(simplifiedB->Equals(divB));
+// }
+
 
 TEST_CASE("Complex Division", "[Divide][Complex]")
 {

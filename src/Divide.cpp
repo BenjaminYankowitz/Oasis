@@ -85,8 +85,18 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
                     break;
                 }
             }
+            
             if (i >= result.size()) {
-                result.push_back(Oasis::Multiply(Oasis::Real(-1), Oasis::Imaginary()).Generalize());
+                result.push_back(std::make_unique<Imaginary>());
+                for (i = 0; i < result.size(); i++) {
+                    if (auto resI = Real::Specialize(*result[i]); resI != nullptr) {
+                        result[i] = Real {-resI->GetValue()}.Generalize();
+                        break;
+                    }
+                }
+                if(i>= result.size()){
+                    result.push_back(std::make_unique<Real>(-1.0));
+                }
             }
             continue;
         }

@@ -29,9 +29,9 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
     }
     if (auto realIdentityCase = Multiply<Real, Expression>::Specialize(simplifiedMultiply); realIdentityCase != nullptr) {
         double rval = realIdentityCase->GetMostSigOp().GetValue();
-        if (rval == 0) {
+        if (rval == 0.0) {
             return std::make_unique<Real>(0);
-        } else if (rval == 1) {
+        } else if (rval == 1.0) {
             return realIdentityCase->GetLeastSigOp().Copy();
         }
     }
@@ -264,8 +264,9 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
         }
     }
 
-    // makes all expr^1 into expr
-    for (auto& val : vals) {
+    // makes all expr^1 into expr and removes any 1.0 terms
+    for (size_t i = 0; i < vals.size(); i++) {
+        auto& val = vals[i];
         if (auto exp = Exponent<Expression, Real>::Specialize(*val); exp != nullptr) {
             if (exp->GetLeastSigOp().GetValue() == 1.0) {
                 val = exp->GetMostSigOp().Generalize();
@@ -276,6 +277,16 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
                 val = mul->GetLeastSigOp().Generalize();
             }
         }
+        if(auto mul = Real::Specialize(*val); mul!=nullptr){
+            if(mul->GetValue()==1.0){
+                std::swap(val, vals.back());
+                vals.pop_back();
+                i--;
+            }
+        }
+    }
+    if (vals.size() == 0) {
+        return std::make_unique<Real>(1.0);
     }
 
     return BuildFromVector<Multiply>(vals);

@@ -42,8 +42,13 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
         if (leftTerm.Equals(rightTerm)) {
             const Real& coefficient1 = likeTermsCase->GetMostSigOp().GetMostSigOp();
             const Real& coefficient2 = likeTermsCase->GetLeastSigOp().GetMostSigOp();
-
-            return std::make_unique<Multiply<Expression>>(Real(coefficient1.GetValue() + coefficient2.GetValue()), leftTerm);
+            double realVal = coefficient1.GetValue() + coefficient2.GetValue();
+            if(realVal==1.0){
+                return leftTerm.Copy();
+            } else if(realVal==0.0){
+                return std::make_unique<Real>(0.0);
+            }
+            return std::make_unique<Multiply<Expression>>(Real(realVal), leftTerm);
         }
     }
 
