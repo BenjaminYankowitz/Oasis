@@ -14,11 +14,6 @@
 #include "Oasis/Util.hpp"
 #include "Oasis/Variable.hpp"
 
-Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp(double a, double b)
-{
-    return Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>>(Oasis::Real(a), Oasis::Multiply(Oasis::Real(b), Oasis::Imaginary()));
-}
-
 TEST_CASE("Complex to real", "[Exponent][complex]")
 {
     const double epsilon = std::pow(10, -5);
@@ -27,20 +22,20 @@ TEST_CASE("Complex to real", "[Exponent][complex]")
     Oasis::Divide<Oasis::Real> Realf(Oasis::Real(3), Oasis::Real(2));
     Oasis::Imaginary img;
     Oasis::Multiply<Oasis::Real, Oasis::Imaginary> imgMult(Oasis::Real(5), img);
-    auto comp = pairToComp(1, 5.0 / 3.0);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(img, Reald), pairToComp(0.156434465, -0.987688341))).GetValue() < epsilon);
+    auto comp = Oasis::Util::pairToComp(1, 5.0 / 3.0);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(img, Reald), Oasis::Util::pairToComp(0.156434465, -0.987688341))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Add(Oasis::Exponent(img, Reali), Oasis::Imaginary())).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(img, Realf), pairToComp(-0.707106781, 0.70710678))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(img, Realf), Oasis::Util::pairToComp(-0.707106781, 0.70710678))).GetValue() < epsilon);
 
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(imgMult, Reald), pairToComp(22.9688607, -145.019679))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(imgMult, Reald), Oasis::Util::pairToComp(22.9688607, -145.019679))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Add(Oasis::Exponent(imgMult, Reali), Oasis::Multiply(Oasis::Real(125), Oasis::Imaginary()))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(imgMult, Realf), pairToComp(-7.90569415, 7.90569415))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Reald), pairToComp(-7.83638781, -0.412382111))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Reali), pairToComp(-7.33333333, 0.37037037))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Realf), pairToComp(0.068362382, 2.70887555))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(imgMult, Realf), Oasis::Util::pairToComp(-7.90569415, 7.90569415))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Reald), Oasis::Util::pairToComp(-7.83638781, -0.412382111))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Reali), Oasis::Util::pairToComp(-7.33333333, 0.37037037))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Exponent(comp, Realf), Oasis::Util::pairToComp(0.068362382, 2.70887555))).GetValue() < epsilon);
 }
 
-TEST_CASE("Decimil Number Exponentiation", "[Exponent][Numerical]")
+TEST_CASE("Decimal Number Exponentiation", "[Exponent][Numerical]")
 {
     const double epsilon = std::pow(10, -5);
     Oasis::Exponent exponent {

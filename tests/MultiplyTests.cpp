@@ -12,11 +12,6 @@
 #include "Oasis/Subtract.hpp"
 #include "Oasis/Util.hpp"
 
-Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp2(double a, double b)
-{
-    return Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>>(Oasis::Real(a), Oasis::Multiply(Oasis::Real(b), Oasis::Imaginary()));
-}
-
 TEST_CASE("Multiplication", "[Multiply]")
 {
     Oasis::Multiply subtract {
@@ -40,22 +35,22 @@ TEST_CASE("Complex Multiplication", "[Multiply][Complex]")
     Oasis::Imaginary img;
     Oasis::Multiply<Oasis::Real, Oasis::Imaginary> imgT(Oasis::Real(13.0), img);
     Oasis::Add<Oasis::Real, Oasis::Imaginary> realPI(Oasis::Real(5.0), img);
-    Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> complex = pairToComp2(11.0, 7.0);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, imgT), pairToComp2(-169.0, 0.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, real), pairToComp2(0, 39.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, img), pairToComp2(-13.0, 0.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, realPI), pairToComp2(-13.0, 65.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, complex), pairToComp2(-91, 143.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, real), pairToComp2(9.0, 0.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, img), pairToComp2(0.0, 3.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, realPI), pairToComp2(15.0, 3.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, complex), pairToComp2(33.0, 21.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, img), pairToComp2(-1.0, 0.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, realPI), pairToComp2(-1.0, 5.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, complex), pairToComp2(-7.0, 11.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, realPI), pairToComp2(24.0, 10.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, complex), pairToComp2(48.0, 46.0))).GetValue() < epsilon);
-    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(complex, complex), pairToComp2(72.0, 154.0))).GetValue() < epsilon);
+    Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> complex = Oasis::Util::pairToComp(11.0, 7.0);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, imgT), Oasis::Util::pairToComp(-169.0, 0.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, real), Oasis::Util::pairToComp(0, 39.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, img), Oasis::Util::pairToComp(-13.0, 0.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, realPI), Oasis::Util::pairToComp(-13.0, 65.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, complex), Oasis::Util::pairToComp(-91, 143.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, real), Oasis::Util::pairToComp(9.0, 0.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, img), Oasis::Util::pairToComp(0.0, 3.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, realPI), Oasis::Util::pairToComp(15.0, 3.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, complex), Oasis::Util::pairToComp(33.0, 21.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, img), Oasis::Util::pairToComp(-1.0, 0.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, realPI), Oasis::Util::pairToComp(-1.0, 5.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, complex), Oasis::Util::pairToComp(-7.0, 11.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, realPI), Oasis::Util::pairToComp(24.0, 10.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, complex), Oasis::Util::pairToComp(48.0, 46.0))).GetValue() < epsilon);
+    REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(complex, complex), Oasis::Util::pairToComp(72.0, 154.0))).GetValue() < epsilon);
 }
 
 TEST_CASE("Generalized Multiplication", "[Multiply][Generalized]")

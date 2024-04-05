@@ -24,6 +24,7 @@ std::unique_ptr<Expression> IntegerComplex::getExpression() const
     }
     return std::make_unique<Add<Real, Expression>>(Real(real * 1.0), *iPar);
 }
+
 IntegerComplex& IntegerComplex::operator+=(const IntegerComplex& rhs)
 {
     real += rhs.real;
@@ -82,6 +83,11 @@ IntegerComplex operator-(IntegerComplex lhs, const IntegerComplex& rhs) { return
 IntegerComplex operator*(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs *= rhs; }
 IntegerComplex operator/(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs /= rhs; }
 IntegerComplex operator%(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs %= rhs; }
+
+Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp(double a, double b)
+{
+    return Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>>(Oasis::Real(a), Oasis::Multiply(Oasis::Real(b), Oasis::Imaginary()));
+}
 
 void PrimesList::generatePrimesUpToN(long long num)
 {

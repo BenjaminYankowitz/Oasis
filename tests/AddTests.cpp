@@ -9,6 +9,8 @@
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Variable.hpp"
+#include "Oasis/Log.hpp"
+#include "Oasis/Util.hpp"
 
 TEST_CASE("Addition", "[Add]")
 {
@@ -44,6 +46,29 @@ TEST_CASE("Symbolic Addition", "[Add][Symbolic]")
         Oasis::Real { 3.0 },
         Oasis::Variable { "x" } }
                 .Equals(*simplified));
+}
+
+TEST_CASE("Log addition", "[Add][Log]"){
+    Oasis::Add addS(Oasis::Log(Oasis::Variable("x"),Oasis::Variable("y")),Oasis::Log(Oasis::Variable("x"),Oasis::Variable("z")));
+    Oasis::Add addF(Oasis::Log(Oasis::Variable("y"),Oasis::Variable("x")),Oasis::Log(Oasis::Variable("z"),Oasis::Variable("x")));
+    auto addSS = addS.Simplify();
+    auto addFS = addF.Simplify();
+    REQUIRE(addSS!=nullptr);
+    auto addSSType = Oasis::Log<Oasis::Variable,Oasis::Add<Oasis::Variable>>::Specialize(*addSS);
+    std::cout << addSS->ToString() << '\n';
+    REQUIRE(addSSType!=nullptr);
+    Oasis::Log goalS(Oasis::Variable("x"),Oasis::Add(Oasis::Variable("y"),Oasis::Variable("z")));
+    REQUIRE(goalS.Equals(*addSSType));
+    REQUIRE(addFS!=nullptr);
+    REQUIRE(!goalS.Equals(*addFS));
+}
+
+TEST_CASE("Imaginary add large expression", "[Add][Imaginary]"){
+    Oasis::Add add(Oasis::Add(Oasis::Imaginary(),Oasis::Real(4)),Oasis::Add(Oasis::Variable("z"),Oasis::Imaginary()));
+    auto addSimp = add.Simplify();
+    REQUIRE(addSimp!=nullptr);
+    Oasis::Add goal(Oasis::Multiply(Oasis::Imaginary(),Oasis::Real(2)),Oasis::Add(Oasis::Variable("z"),Oasis::Real(4)));
+    REQUIRE(addSimp->Equals(goal));
 }
 
 /*

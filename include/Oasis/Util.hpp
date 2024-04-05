@@ -1,5 +1,8 @@
 #ifndef OASIS_UTIL_HPP
 #define OASIS_UTIL_HPP
+#include "Oasis/Add.hpp"
+#include "Oasis/Imaginary.hpp"
+#include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 namespace Oasis::Util {
 class IntegerComplex {
@@ -40,12 +43,13 @@ public:
 private:
     static std::vector<long long> primes;
 };
-
 IntegerComplex operator+(IntegerComplex lhs, const IntegerComplex& rhs);
 IntegerComplex operator-(IntegerComplex lhs, const IntegerComplex& rhs);
 IntegerComplex operator*(IntegerComplex lhs, const IntegerComplex& rhs);
 IntegerComplex operator/(IntegerComplex lhs, const IntegerComplex& rhs);
 IntegerComplex operator%(IntegerComplex lhs, const IntegerComplex& rhs);
+
+Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp(double a, double b);
 
 long long gcf(long long a, long long b);
 bool isInt(double n);

@@ -99,9 +99,23 @@ TEST_CASE("imaginary linear polynomial")
     }
 }
 
+TEST_CASE("irrational linear", "[linearFormula]"){
+    const double epsilon = std::pow(10, -5);
+    Oasis::Add add {
+        Oasis::Real(1.3),
+        Oasis::Variable("x")
+    };
+    auto zeros = add.FindZeros();
+    REQUIRE(zeros.size() == 1);
+    if (zeros.size() == 1) {
+        auto root = Oasis::Real::Specialize(*zeros[0]->Simplify());
+        REQUIRE(root != nullptr);
+        REQUIRE(std::abs(root->GetValue()+1.3) < epsilon);
+    }
+}
+
 TEST_CASE("irrational cubic", "[cubicFormula]")
 {
-
     const double epsilon = std::pow(10, -5);
     std::vector<std::unique_ptr<Oasis::Expression>> vec;
     long offset = -3;
