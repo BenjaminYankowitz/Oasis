@@ -9,8 +9,10 @@
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Variable.hpp"
+
 #include "Oasis/Log.hpp"
 #include "Oasis/Util.hpp"
+#include <functional>
 
 TEST_CASE("Addition", "[Add]")
 {
@@ -48,89 +50,94 @@ TEST_CASE("Symbolic Addition", "[Add][Symbolic]")
                 .Equals(*simplified));
 }
 
-TEST_CASE("Log Addition", "[Add][Log]"){
-    Oasis::Add addS(Oasis::Log(Oasis::Variable("x"),Oasis::Variable("y")),Oasis::Log(Oasis::Variable("x"),Oasis::Variable("z")));
-    Oasis::Add addF(Oasis::Log(Oasis::Variable("y"),Oasis::Variable("x")),Oasis::Log(Oasis::Variable("z"),Oasis::Variable("x")));
+TEST_CASE("Log Addition", "[Add][Log]")
+{
+    Oasis::Add addS(Oasis::Log(Oasis::Variable("x"), Oasis::Variable("y")), Oasis::Log(Oasis::Variable("x"), Oasis::Variable("z")));
+    Oasis::Add addF(Oasis::Log(Oasis::Variable("y"), Oasis::Variable("x")), Oasis::Log(Oasis::Variable("z"), Oasis::Variable("x")));
     auto addSS = addS.Simplify();
     auto addFS = addF.Simplify();
-    REQUIRE(addSS!=nullptr);
-    auto addSSType = Oasis::Log<Oasis::Variable,Oasis::Multiply<Oasis::Variable>>::Specialize(*addSS);
-    REQUIRE(addSSType!=nullptr);
-    Oasis::Log goalS(Oasis::Variable("x"),Oasis::Multiply(Oasis::Variable("y"),Oasis::Variable("z")));
+    REQUIRE(addSS != nullptr);
+    auto addSSType = Oasis::Log<Oasis::Variable, Oasis::Multiply<Oasis::Variable>>::Specialize(*addSS);
+    REQUIRE(addSSType != nullptr);
+    Oasis::Log goalS(Oasis::Variable("x"), Oasis::Multiply(Oasis::Variable("y"), Oasis::Variable("z")));
     REQUIRE(goalS.Equals(*addSSType));
-    REQUIRE(addFS!=nullptr);
+    REQUIRE(addFS != nullptr);
     REQUIRE(!goalS.Equals(*addFS));
 }
 
-TEST_CASE("Imaginary Add Large Expression", "[Add][Imaginary]"){
-    Oasis::Add add(Oasis::Add(Oasis::Imaginary(),Oasis::Real(4)),Oasis::Add(Oasis::Variable("z"),Oasis::Imaginary()));
+TEST_CASE("Imaginary Add Large Expression", "[Add][Imaginary]")
+{
+    Oasis::Add add(Oasis::Add(Oasis::Imaginary(), Oasis::Real(4)), Oasis::Add(Oasis::Variable("z"), Oasis::Imaginary()));
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
-    Oasis::Add goal(Oasis::Multiply(Oasis::Imaginary(),Oasis::Real(2)),Oasis::Add(Oasis::Variable("z"),Oasis::Real(4)));
+    REQUIRE(addSimp != nullptr);
+    Oasis::Add goal(Oasis::Multiply(Oasis::Imaginary(), Oasis::Real(2)), Oasis::Add(Oasis::Variable("z"), Oasis::Real(4)));
     REQUIRE(addSimp->Equals(goal));
 }
 
-TEST_CASE("Addition Of Like Terms Doesn't Multiply By 1", "[Add][Like Terms]"){
-    Oasis::Add add(Oasis::Multiply(Oasis::Imaginary(),Oasis::Real(0.5)),Oasis::Multiply(Oasis::Imaginary(),Oasis::Real(0.5)));
+TEST_CASE("Addition Of Like Terms Doesn't Multiply By 1", "[Add][Like Terms]")
+{
+    Oasis::Add add(Oasis::Multiply(Oasis::Imaginary(), Oasis::Real(0.5)), Oasis::Multiply(Oasis::Imaginary(), Oasis::Real(0.5)));
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
-    CAPTURE(addSimp->ToString());    
+    REQUIRE(addSimp != nullptr);
+    CAPTURE(addSimp->ToString());
     REQUIRE(addSimp->Is<Oasis::Imaginary>());
 }
 
-TEST_CASE("Symbolic Add Large Expression", "[Add][Symbolic]"){
-    Oasis::Add add(Oasis::Add(Oasis::Variable("y"),Oasis::Variable("y")),Oasis::Add(Oasis::Variable("x"),Oasis::Variable("y")));
+TEST_CASE("Symbolic Add Large Expression", "[Add][Symbolic]")
+{
+    Oasis::Add add(Oasis::Add(Oasis::Variable("y"), Oasis::Variable("y")), Oasis::Add(Oasis::Variable("x"), Oasis::Variable("y")));
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
-    Oasis::Add goal(Oasis::Variable("x"),Oasis::Multiply(Oasis::Variable("y"),Oasis::Real(3.0)));
+    REQUIRE(addSimp != nullptr);
+    Oasis::Add goal(Oasis::Variable("x"), Oasis::Multiply(Oasis::Variable("y"), Oasis::Real(3.0)));
     CAPTURE(addSimp->ToString());
     REQUIRE(addSimp->Equals(goal));
 }
 
-TEST_CASE("Symbolic Add Different Variables", "[Add][Symbolic]"){
+TEST_CASE("Symbolic Add Different Variables", "[Add][Symbolic]")
+{
     const Oasis::Variable x("x");
     const Oasis::Variable y("y");
     const Oasis::Variable z("z");
     const Oasis::Variable q("q");
-    Oasis::Add add(Oasis::Multiply(Oasis::Exponent(z,z),Oasis::Variable("y")),Oasis::Add(Oasis::Exponent(q,q),Oasis::Variable("x")));
+    Oasis::Add add(Oasis::Multiply(Oasis::Exponent(z, z), Oasis::Variable("y")), Oasis::Add(Oasis::Exponent(q, q), Oasis::Variable("x")));
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
+    REQUIRE(addSimp != nullptr);
     CAPTURE(addSimp->ToString());
     REQUIRE(addSimp->Equals(add));
 }
 
-TEST_CASE("Symbolic Add Different Exponents", "[Add][Symbolic]"){
+TEST_CASE("Symbolic Add Different Exponents", "[Add][Symbolic]")
+{
     const Oasis::Variable x("x");
     const Oasis::Variable y("y");
     const Oasis::Variable z("z");
-    Oasis::Add add{
-        Oasis::Add{
-            Oasis::Multiply(Oasis::Real(3.0),Oasis::Exponent(z,z)),
-            Oasis::Exponent(y,y)
-        },
-        Oasis::Add{
-            Oasis::Multiply(Oasis::Real(7.0),Oasis::Exponent(z,z)),
-            Oasis::Multiply(Oasis::Real(8.0),Oasis::Exponent(x,x)),
+    Oasis::Add add {
+        Oasis::Add {
+            Oasis::Multiply(Oasis::Real(3.0), Oasis::Exponent(z, z)),
+            Oasis::Exponent(y, y) },
+        Oasis::Add {
+            Oasis::Multiply(Oasis::Real(7.0), Oasis::Exponent(z, z)),
+            Oasis::Multiply(Oasis::Real(8.0), Oasis::Exponent(x, x)),
         }
-        };
+    };
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
+    REQUIRE(addSimp != nullptr);
     CAPTURE(addSimp->ToString());
     Oasis::Add goal {
         Oasis::Add {
-            Oasis::Multiply(Oasis::Real(10.0),Oasis::Exponent(z,z)),
-            Oasis::Exponent(y,y)
-        },
-        Oasis::Multiply(Oasis::Real(8.0),Oasis::Exponent(x,x))
+            Oasis::Multiply(Oasis::Real(10.0), Oasis::Exponent(z, z)),
+            Oasis::Exponent(y, y) },
+        Oasis::Multiply(Oasis::Real(8.0), Oasis::Exponent(x, x))
     };
     REQUIRE(addSimp->Equals(goal));
 }
 
-TEST_CASE("Adding x+ax Gives x For Very Small a", "[Add][Symbolic]"){
+TEST_CASE("Adding x+ax Gives x For Very Small a", "[Add][Symbolic]")
+{
     const Oasis::Variable x("x");
-    Oasis::Add add(x,Oasis::Multiply(x,Oasis::Real(std::pow(2.0,-60.0))));
+    Oasis::Add add(x, Oasis::Multiply(x, Oasis::Real(std::pow(2.0, -60.0))));
     auto addSimp = add.Simplify();
-    REQUIRE(addSimp!=nullptr);
+    REQUIRE(addSimp != nullptr);
     CAPTURE(addSimp->ToString());
     REQUIRE(addSimp->Equals(x));
 }
@@ -348,4 +355,22 @@ TEST_CASE("Add Operator Overload", "[Add][Operator Overload]")
 
     REQUIRE(realSum != nullptr);
     REQUIRE(realSum->GetValue() == 3.0);
+}
+
+TEST_CASE("Variadic Add Constructor", "[Add]")
+{
+    const Oasis::Add<> add {
+        Oasis::Real { 1.0 },
+        Oasis::Real { 2.0 },
+        Oasis::Real { 3.0 },
+        Oasis::Real { 4.0 },
+        Oasis::Multiply {
+            Oasis::Real { 5.0 },
+            Oasis::Real { 6.0 } }
+    };
+
+    const Oasis::Real expected { 40.0 };
+
+    const auto simplified = add.Simplify();
+    REQUIRE(expected.Equals(*simplified));
 }

@@ -190,7 +190,11 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
         } else if (auto img = Imaginary::Specialize(*val); img != nullptr) {
             numeratorVals.push_back(val->Generalize());
         } else if (auto expR = Exponent<Expression, Real>::Specialize(*val); expR != nullptr) {
-            if (expR->GetLeastSigOp().GetValue() < 0.0) {
+            auto power = expR->GetLeastSigOp().GetValue();
+            if(power == 0){
+                continue;
+            }
+            if (power < 0.0) {
                 denominatorVals.push_back(Exponent { expR->GetMostSigOp(), Real { expR->GetLeastSigOp().GetValue() * -1.0 } }.Generalize());
             } else {
                 numeratorVals.push_back(val->Generalize());
@@ -223,17 +227,20 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
         }
     }
 
+    auto dividend = numeratorVals.size() == 1 ? std::move(numeratorVals.front()) : BuildFromVector<Multiply>(numeratorVals);
+    auto divisor = denominatorVals.size() == 1 ? std::move(denominatorVals.front()) : BuildFromVector<Multiply>(denominatorVals);
+
     // rebuild subtrees
-    if (numeratorVals.empty() && denominatorVals.empty()) {
+    if (!dividend && !divisor){
         return std::make_unique<Real>(1.0);
     }
-    if (numeratorVals.empty()) {
-        return Divide { Real(1), *(BuildFromVector<Multiply>(denominatorVals)->Simplify()) }.Generalize();
-    } else if (denominatorVals.empty()) {
-        return BuildFromVector<Multiply>(numeratorVals)->Simplify();
-    }
+    if (!dividend && divisor)
+        return Divide { Real { 1.0 }, *divisor }.Copy();
 
-    return Divide { *(BuildFromVector<Multiply>(numeratorVals)->Simplify()), *(BuildFromVector<Multiply>(denominatorVals)->Simplify()) }.Generalize();
+    if (dividend && !divisor)
+        return dividend;
+
+    return Divide { *dividend, *divisor }.Copy();
 }
 
 auto Divide<Expression>::ToString() const -> std::string
