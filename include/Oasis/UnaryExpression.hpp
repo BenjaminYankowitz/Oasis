@@ -84,6 +84,16 @@ public:
         return this->GetType() == other.GetType();
     }
 
+    [[nodiscard]] virtual auto SubstituteVariable(const Expression& var, const Expression& exp) const -> std::unique_ptr<Expression> override
+    {
+        DerivedGeneralized generalized;
+
+        if (op) {
+            generalized.SetOperand(*op->SubstituteVariable(var, exp));
+        }
+        return std::make_unique<DerivedGeneralized>(generalized);
+    }
+
     auto SetOperand(const OperandT& operand) -> void
     {
         if constexpr (std::same_as<OperandT, Expression>) {

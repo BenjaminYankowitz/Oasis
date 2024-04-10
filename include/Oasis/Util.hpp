@@ -7,22 +7,14 @@
 namespace Oasis::Util {
 class IntegerComplex {
 public:
-    IntegerComplex(long long R)
-        : real(R)
-        , imaginary(0)
-    {
-    }
-    IntegerComplex(long long R, long long I)
-        : real(R)
-        , imaginary(I)
-    {
-    }
-    long long getReal() { return real; }
-    long long getImaginary() { return imaginary; }
+    IntegerComplex(long long R);
+    IntegerComplex(long long R, long long I);
+    long long getReal() const;
+    long long getImaginary() const;
     std::unique_ptr<Expression> getExpression() const;
-    long long absSquared() const { return real * real + imaginary * imaginary; }
-    IntegerComplex conj() const { return IntegerComplex(real, -imaginary); }
-    bool operator==(IntegerComplex rhs) { return imaginary == rhs.imaginary && real == rhs.real; }
+    long long absSquared() const;
+    IntegerComplex conj() const;
+    bool operator==(IntegerComplex rhs) const;
     IntegerComplex& operator+=(const IntegerComplex& rhs);
     IntegerComplex& operator*=(const IntegerComplex& rhs);
     IntegerComplex& operator-=(const IntegerComplex& rhs);
@@ -34,6 +26,37 @@ private:
     long long real;
     long long imaginary;
 };
+IntegerComplex operator+(IntegerComplex lhs, const IntegerComplex& rhs);
+IntegerComplex operator-(IntegerComplex lhs, const IntegerComplex& rhs);
+IntegerComplex operator*(IntegerComplex lhs, const IntegerComplex& rhs);
+IntegerComplex operator/(IntegerComplex lhs, const IntegerComplex& rhs);
+IntegerComplex operator%(IntegerComplex lhs, const IntegerComplex& rhs);
+
+class Complex {
+public:
+    Complex(double R);
+    Complex(double R, double I);
+    double getReal() const;
+    double getImaginary() const;
+    std::unique_ptr<Expression> getExpression() const;
+    double absSquared() const;
+    Complex conj() const;
+    bool operator==(Complex rhs) const;
+    Complex& operator+=(const Complex& rhs);
+    Complex& operator*=(const Complex& rhs);
+    Complex& operator-=(const Complex& rhs);
+    Complex& operator/=(const Complex& rhs);
+    bool operator<(const Complex& rhs) const;
+
+private:
+    double real;
+    double imaginary;
+};
+
+Complex operator+(Complex lhs, const Complex& rhs);
+Complex operator-(Complex lhs, const Complex& rhs);
+Complex operator*(Complex lhs, const Complex& rhs);
+Complex operator/(Complex lhs, const Complex& rhs);
 
 class PrimesList {
 public:
@@ -43,11 +66,6 @@ public:
 private:
     static std::vector<long long> primes;
 };
-IntegerComplex operator+(IntegerComplex lhs, const IntegerComplex& rhs);
-IntegerComplex operator-(IntegerComplex lhs, const IntegerComplex& rhs);
-IntegerComplex operator*(IntegerComplex lhs, const IntegerComplex& rhs);
-IntegerComplex operator/(IntegerComplex lhs, const IntegerComplex& rhs);
-IntegerComplex operator%(IntegerComplex lhs, const IntegerComplex& rhs);
 
 Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp(double a, double b);
 

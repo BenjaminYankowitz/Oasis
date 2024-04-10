@@ -36,13 +36,16 @@ TEST_CASE("Complex Multiplication", "[Multiply][Complex]")
     Oasis::Multiply<Oasis::Real, Oasis::Imaginary> imgT(Oasis::Real(13.0), img);
     Oasis::Add<Oasis::Real, Oasis::Imaginary> realPI(Oasis::Real(5.0), img);
     Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> complex = Oasis::Util::pairToComp(11.0, 7.0);
+    std::cout << "test1\n";
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, imgT), Oasis::Util::pairToComp(-169.0, 0.0))).GetValue() < epsilon);
+    std::cout << "test2\n";
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, real), Oasis::Util::pairToComp(0, 39.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, img), Oasis::Util::pairToComp(-13.0, 0.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, realPI), Oasis::Util::pairToComp(-13.0, 65.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(imgT, complex), Oasis::Util::pairToComp(-91, 143.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, real), Oasis::Util::pairToComp(9.0, 0.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, img), Oasis::Util::pairToComp(0.0, 3.0))).GetValue() < epsilon);
+    std::cout << "test3\n";
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, realPI), Oasis::Util::pairToComp(15.0, 3.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(real, complex), Oasis::Util::pairToComp(33.0, 21.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, img), Oasis::Util::pairToComp(-1.0, 0.0))).GetValue() < epsilon);
@@ -50,6 +53,7 @@ TEST_CASE("Complex Multiplication", "[Multiply][Complex]")
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(img, complex), Oasis::Util::pairToComp(-7.0, 11.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, realPI), Oasis::Util::pairToComp(24.0, 10.0))).GetValue() < epsilon);
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(realPI, complex), Oasis::Util::pairToComp(48.0, 46.0))).GetValue() < epsilon);
+    std::cout << "test4\n";
     REQUIRE(Oasis::Util::abs(Oasis::Subtract(Oasis::Multiply(complex, complex), Oasis::Util::pairToComp(72.0, 154.0))).GetValue() < epsilon);
 }
 

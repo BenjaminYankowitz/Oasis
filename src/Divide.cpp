@@ -9,6 +9,7 @@
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Subtract.hpp"
 #include "Oasis/Variable.hpp"
+#include "Oasis/Util.hpp"
 #include <map>
 #include <vector>
 
@@ -63,41 +64,23 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
     for (const auto& num : numerator) {
         result.push_back(num->Copy());
     }
-
+    Util::Complex literalTerms(1);
     for (const auto& denom : denominator) {
         size_t i = 0;
         if (auto real = Real::Specialize(*denom); real != nullptr) {
-            for (; i < result.size(); i++) {
-                if (auto resI = Real::Specialize(*result[i]); resI != nullptr) {
-                    result[i] = Real { resI->GetValue() / real->GetValue() }.Generalize();
-                    break;
-                }
-            }
-            if (i >= result.size()) {
-                result.push_back(Real { 1 / real->GetValue() }.Generalize());
-            }
+            literalTerms*=real->GetValue();
             continue;
         }
         if (auto img = Imaginary::Specialize(*denom); img != nullptr) {
-            for (; i < result.size(); i++) {
-                if (auto resI = Imaginary::Specialize(*result[i]); resI != nullptr) {
-                    result[i] = Real { 1.0 }.Generalize();
-                    break;
-                }
-            }
-            
-            if (i >= result.size()) {
-                result.push_back(std::make_unique<Imaginary>());
-                for (i = 0; i < result.size(); i++) {
-                    if (auto resI = Real::Specialize(*result[i]); resI != nullptr) {
-                        result[i] = Real {-resI->GetValue()}.Generalize();
-                        break;
-                    }
-                }
-                if(i>= result.size()){
-                    result.push_back(std::make_unique<Real>(-1.0));
-                }
-            }
+            literalTerms*=Util::Complex(0,1);
+            continue;
+        }
+        if (auto complex = Add<Real, Imaginary>::Specialize(*denom); complex != nullptr) {
+            literalTerms*=(complex->GetMostSigOp(),1);
+            continue;
+        }
+        if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*denom); complex != nullptr) {
+            literalTerms*=(complex->GetMostSigOp(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
             continue;
         }
         if (auto var = Variable::Specialize(*denom); var != nullptr) {
@@ -165,18 +148,12 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
                 break;
             }
         }
-        if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*denom); complex != nullptr) {
-            const Real& realPrt = complex->GetMostSigOp();
-            double realPrtD = realPrt.GetValue();
-            const Multiply<Real, Imaginary>& imgPrt = complex->GetLeastSigOp();
-            double imgPrtD = imgPrt.GetMostSigOp().GetValue();
-            result.push_back(std::make_unique<Subtract<Real, Multiply<Real, Imaginary>>>(realPrt, imgPrt));
-            result.push_back(std::make_unique<Real>(1 / (realPrtD * realPrtD + imgPrtD * imgPrtD)));
-            continue;
-        }
         if (i >= result.size()) {
             result.push_back(Exponent<Expression> { *denom, Real { -1.0 } }.Generalize());
         }
+    }
+    if(literalTerms!=1){
+        result.push_back((Util::Complex(1)/literalTerms).getExpression());
     }
 
     // rebuild into tree
@@ -191,9 +168,6 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
             numeratorVals.push_back(val->Generalize());
         } else if (auto expR = Exponent<Expression, Real>::Specialize(*val); expR != nullptr) {
             auto power = expR->GetLeastSigOp().GetValue();
-            if(power == 0){
-                continue;
-            }
             if (power < 0.0) {
                 denominatorVals.push_back(Exponent { expR->GetMostSigOp(), Real { expR->GetLeastSigOp().GetValue() * -1.0 } }.Generalize());
             } else {

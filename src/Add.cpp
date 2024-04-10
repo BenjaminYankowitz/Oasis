@@ -8,14 +8,18 @@
 #include "Oasis/Imaginary.hpp"
 #include "Oasis/Log.hpp"
 #include "Oasis/Multiply.hpp"
+#include "Oasis/Util.hpp"
 
 namespace Oasis {
 
 auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
 {
+    std::cout << "17Add\n";
     auto simplifiedAugend = mostSigOp ? mostSigOp->Simplify() : nullptr;
     auto simplifiedAddend = leastSigOp ? leastSigOp->Simplify() : nullptr;
+    std::cout << "20Add\n";
     Add simplifiedAdd { *simplifiedAugend, *simplifiedAddend };
+    std::cout << "22Add\n";
 
     if (auto realCase = Add<Real>::Specialize(simplifiedAdd); realCase != nullptr) {
         const Real& firstReal = realCase->GetMostSigOp();
@@ -80,38 +84,27 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
     std::vector<std::unique_ptr<Expression>> adds;
     std::vector<std::unique_ptr<Expression>> vals;
     simplifiedAdd.Flatten(adds);
+    Util::Complex literalTerms(0);
+    std::cout << "preloop\n";
     for (const auto& addend : adds) {
         // real
         size_t i = 0;
         if (auto real = Real::Specialize(*addend); real != nullptr) {
-            for (; i < vals.size(); i++) {
-                if (auto valI = Real::Specialize(*vals[i]); valI != nullptr) {
-                    vals[i] = Real { valI->GetValue() + real->GetValue() }.Generalize();
-                    break;
-                }
-            }
-            if (i >= vals.size()) {
-                // check to make sure it is one thing only
-                vals.push_back(addend->Generalize());
-            }
+            literalTerms+=real->GetValue();
             continue;
         }
         // single i
         if (auto img = Imaginary::Specialize(*addend); img != nullptr) {
-            for (; i < vals.size(); i++) {
-                if (auto valI = Multiply<Expression, Imaginary>::Specialize(*vals[i]); valI != nullptr) {
-                    vals[i] = Multiply<Expression> { *(Add<Expression> { valI->GetMostSigOp(), Real { 1.0 } }.Simplify()), Imaginary {} }.Generalize();
-                    break;
-                }
-            }
-            if (i >= vals.size()) {
-                // check to make sure it is one thing only
-                vals.push_back(Multiply<Expression> { Real { 1.0 }, Imaginary {} }.Generalize());
-            }
+            literalTerms+=Util::Complex(0,1);
             continue;
         }
         // n*i
         if (auto img = Multiply<Expression, Imaginary>::Specialize(*addend); img != nullptr) {
+            auto& coefficent = img->GetMostSigOp();
+            if(auto realCoefficent = Real::Specialize(coefficent); realCoefficent!=nullptr){
+                literalTerms+=Util::Complex(0,realCoefficent->GetValue());
+                continue;
+            }
             for (; i < vals.size(); i++) {
                 if (auto valI = Multiply<Expression, Imaginary>::Specialize(*vals[i]); valI != nullptr) {
                     vals[i] = Multiply<Expression> { *(Add<Expression> { valI->GetMostSigOp(), img->GetMostSigOp() }.Simplify()), Imaginary {} }.Generalize();
@@ -193,6 +186,7 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
             continue;
         }
     }
+    std::cout << "postloop\n";
 
     // rebuild equation after simplification.
 
@@ -209,10 +203,17 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
             }
         }
     }
+    std::cout << "post build\n";
+    if(literalTerms!=0){
+        vals.push_back(literalTerms.getExpression());
+    }
     if (vals.size() == 0) {
         return std::make_unique<Real>(0);
     }
-    return BuildFromVector<Add>(vals);
+    std::cout << "pre vector build\n";
+    auto ret = BuildFromVector<Add>(vals);
+    std::cout << "post vector build\n";
+    return ret;
 }
 
 auto Add<Expression>::ToString() const -> std::string

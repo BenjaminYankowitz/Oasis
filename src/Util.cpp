@@ -7,7 +7,21 @@
 #include <algorithm>
 #include <cmath>
 namespace Oasis::Util {
-
+IntegerComplex::IntegerComplex(long long R)
+    : real(R)
+    , imaginary(0)
+{
+}
+IntegerComplex::IntegerComplex(long long R, long long I)
+    : real(R)
+    , imaginary(I)
+{
+}
+long long IntegerComplex::getReal() const { return real; }
+long long IntegerComplex::getImaginary() const { return imaginary; }
+long long IntegerComplex::absSquared() const { return real * real + imaginary * imaginary; }
+IntegerComplex IntegerComplex::conj() const { return IntegerComplex(real, -imaginary); }
+bool IntegerComplex::operator==(IntegerComplex rhs) const { return imaginary == rhs.imaginary && real == rhs.real; }
 std::unique_ptr<Expression> IntegerComplex::getExpression() const
 {
     if (imaginary == 0) {
@@ -24,7 +38,6 @@ std::unique_ptr<Expression> IntegerComplex::getExpression() const
     }
     return std::make_unique<Add<Real, Expression>>(Real(real * 1.0), *iPar);
 }
-
 IntegerComplex& IntegerComplex::operator+=(const IntegerComplex& rhs)
 {
     real += rhs.real;
@@ -77,12 +90,84 @@ bool IntegerComplex::operator<(const IntegerComplex& rhs) const
     }
     return mAbs < rhsAbs;
 }
-
 IntegerComplex operator+(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs += rhs; }
 IntegerComplex operator-(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs -= rhs; }
 IntegerComplex operator*(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs *= rhs; }
 IntegerComplex operator/(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs /= rhs; }
 IntegerComplex operator%(IntegerComplex lhs, const IntegerComplex& rhs) { return lhs %= rhs; }
+
+Complex::Complex(double R)
+    : real(R)
+    , imaginary(0)
+{
+}
+Complex::Complex(double R, double I)
+    : real(R)
+    , imaginary(I)
+{
+}
+double Complex::getReal() const { return real; }
+double Complex::getImaginary() const { return imaginary; }
+double Complex::absSquared() const { return real * real + imaginary * imaginary; }
+Complex Complex::conj() const { return Complex(real, -imaginary); }
+bool Complex::operator==(Complex rhs) const { return imaginary == rhs.imaginary && real == rhs.real; }
+std::unique_ptr<Expression> Complex::getExpression() const
+{
+    if (imaginary == 0) {
+        return std::make_unique<Real>(real * 1.0);
+    }
+    std::unique_ptr<Expression> iPar;
+    if (imaginary == 1) {
+        iPar = std::make_unique<Imaginary>();
+    } else {
+        iPar = std::make_unique<Multiply<Real, Imaginary>>(Real(imaginary * 1.0), Imaginary());
+    }
+    if (real == 0) {
+        return iPar;
+    }
+    return std::make_unique<Add<Real, Expression>>(Real(real * 1.0), *iPar);
+}
+Complex& Complex::operator+=(const Complex& rhs)
+{
+    real += rhs.real;
+    imaginary += rhs.imaginary;
+    return *this;
+}
+Complex& Complex::operator*=(const Complex& rhs)
+{
+    const auto oldReal = real;
+    const auto rhsOldReal = rhs.real;
+    real = oldReal * rhs.real - imaginary * rhs.imaginary;
+    imaginary = oldReal * rhs.imaginary + imaginary * rhsOldReal;
+    return *this;
+}
+Complex& Complex::operator-=(const Complex& rhs)
+{
+    real -= rhs.real;
+    imaginary -= rhs.imaginary;
+    return *this;
+}
+Complex& Complex::operator/=(const Complex& rhs)
+{
+    const long long base = rhs.absSquared();
+    operator*=(rhs.conj());
+    real /= base;
+    imaginary /= base;
+    return *this;
+}
+bool Complex::operator<(const Complex& rhs) const
+{
+    auto mAbs = absSquared();
+    auto rhsAbs = rhs.absSquared();
+    if (mAbs == rhsAbs) {
+        return imaginary < rhs.imaginary;
+    }
+    return mAbs < rhsAbs;
+}
+Complex operator+(Complex lhs, const Complex& rhs) { return lhs += rhs; }
+Complex operator-(Complex lhs, const Complex& rhs) { return lhs -= rhs; }
+Complex operator*(Complex lhs, const Complex& rhs) { return lhs *= rhs; }
+Complex operator/(Complex lhs, const Complex& rhs) { return lhs /= rhs; }
 
 Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>> pairToComp(double a, double b)
 {
@@ -128,7 +213,11 @@ bool isInt(double n)
 
 Oasis::Real abs(const Oasis::Expression& exp)
 {
+    std::cout << "hi" <<"\n";
+    std::cout << exp.ToString() <<"\n";
     auto simpExp = exp.Simplify();
+    std::cout << "simped\n";
+    std::cout << simpExp->ToString() <<"\n";
     if (auto realCase = Real::Specialize(*simpExp); realCase != nullptr) {
         return Real(std::abs(realCase->GetValue()));
     }
