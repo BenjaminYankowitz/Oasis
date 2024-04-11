@@ -149,7 +149,7 @@ Complex& Complex::operator-=(const Complex& rhs)
 }
 Complex& Complex::operator/=(const Complex& rhs)
 {
-    const long long base = rhs.absSquared();
+    const double base = rhs.absSquared();
     operator*=(rhs.conj());
     real /= base;
     imaginary /= base;
@@ -213,11 +213,7 @@ bool isInt(double n)
 
 Oasis::Real abs(const Oasis::Expression& exp)
 {
-    std::cout << "hi" <<"\n";
-    std::cout << exp.ToString() <<"\n";
     auto simpExp = exp.Simplify();
-    std::cout << "simped\n";
-    std::cout << simpExp->ToString() <<"\n";
     if (auto realCase = Real::Specialize(*simpExp); realCase != nullptr) {
         return Real(std::abs(realCase->GetValue()));
     }

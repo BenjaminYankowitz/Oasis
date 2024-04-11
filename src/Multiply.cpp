@@ -11,13 +11,9 @@ namespace Oasis {
 
 auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
 {
-    std::cout << "multstart \n";
     auto simplifiedMultiplicand = mostSigOp->Simplify();
     auto simplifiedMultiplier = leastSigOp->Simplify();
-    std::cout << (mostSigOp!=nullptr) << (mostSigOp!=nullptr) << '\n';
-    std::cout << (simplifiedMultiplicand!=nullptr) << (simplifiedMultiplier!=nullptr) << '\n';
     Multiply simplifiedMultiply { *simplifiedMultiplicand, *simplifiedMultiplier };
-    std::cout << "constru \n";
 
     // if (auto realCase = Multiply<Real>::Specialize(simplifiedMultiply); realCase != nullptr) {
     //     const Real& multiplicand = realCase->GetMostSigOp();
@@ -195,6 +191,14 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
             literalTerms*=Util::Complex(0,1);
             continue;
         }
+        if (auto complex = Add<Real, Imaginary>::Specialize(*multiplicand); complex != nullptr) {
+            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),1);
+            continue;
+        }
+        if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*multiplicand); complex != nullptr) {
+            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
+            continue;
+        }
         // expr^n
         if (auto expr = Exponent<Expression, Expression>::Specialize(*multiplicand); expr != nullptr) {
             for (; i < vals.size(); i++) {
@@ -248,9 +252,10 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
     }
     if (vals.size() == 0) {
         return std::make_unique<Real>(1.0);
+    } else if(vals.size() == 1){
+        return std::move(vals[0]);
     }
-
-    auto ret =  BuildFromVector<Multiply>(vals);
+    auto ret = BuildFromVector<Multiply>(vals);
     return ret;
 
     // return simplifiedMultiply.Copy();

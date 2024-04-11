@@ -14,42 +14,39 @@ namespace Oasis {
 
 auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
 {
-    std::cout << "17Add\n";
     auto simplifiedAugend = mostSigOp ? mostSigOp->Simplify() : nullptr;
     auto simplifiedAddend = leastSigOp ? leastSigOp->Simplify() : nullptr;
-    std::cout << "20Add\n";
     Add simplifiedAdd { *simplifiedAugend, *simplifiedAddend };
-    std::cout << "22Add\n";
 
-    if (auto realCase = Add<Real>::Specialize(simplifiedAdd); realCase != nullptr) {
-        const Real& firstReal = realCase->GetMostSigOp();
-        const Real& secondReal = realCase->GetLeastSigOp();
+    // if (auto realCase = Add<Real>::Specialize(simplifiedAdd); realCase != nullptr) {
+    //     const Real& firstReal = realCase->GetMostSigOp();
+    //     const Real& secondReal = realCase->GetLeastSigOp();
 
-        return std::make_unique<Real>(firstReal.GetValue() + secondReal.GetValue());
-    }
+    //     return std::make_unique<Real>(firstReal.GetValue() + secondReal.GetValue());
+    // }
 
-    if (auto zeroCase = Add<Real, Expression>::Specialize(simplifiedAdd); zeroCase != nullptr) {
-        if (zeroCase->GetMostSigOp().GetValue() == 0) {
-            return zeroCase->GetLeastSigOp().Copy();
-        }
-    }
+    // if (auto zeroCase = Add<Real, Expression>::Specialize(simplifiedAdd); zeroCase != nullptr) {
+    //     if (zeroCase->GetMostSigOp().GetValue() == 0) {
+    //         return zeroCase->GetLeastSigOp().Copy();
+    //     }
+    // }
 
-    if (auto likeTermsCase = Add<Multiply<Real, Expression>>::Specialize(simplifiedAdd); likeTermsCase != nullptr) {
-        const Oasis::IExpression auto& leftTerm = likeTermsCase->GetMostSigOp().GetLeastSigOp();
-        const Oasis::IExpression auto& rightTerm = likeTermsCase->GetLeastSigOp().GetLeastSigOp();
+    // if (auto likeTermsCase = Add<Multiply<Real, Expression>>::Specialize(simplifiedAdd); likeTermsCase != nullptr) {
+    //     const Oasis::IExpression auto& leftTerm = likeTermsCase->GetMostSigOp().GetLeastSigOp();
+    //     const Oasis::IExpression auto& rightTerm = likeTermsCase->GetLeastSigOp().GetLeastSigOp();
 
-        if (leftTerm.Equals(rightTerm)) {
-            const Real& coefficient1 = likeTermsCase->GetMostSigOp().GetMostSigOp();
-            const Real& coefficient2 = likeTermsCase->GetLeastSigOp().GetMostSigOp();
-            double realVal = coefficient1.GetValue() + coefficient2.GetValue();
-            if(realVal==1.0){
-                return leftTerm.Copy();
-            } else if(realVal==0.0){
-                return std::make_unique<Real>(0.0);
-            }
-            return std::make_unique<Multiply<Expression>>(Real(realVal), leftTerm);
-        }
-    }
+    //     if (leftTerm.Equals(rightTerm)) {
+    //         const Real& coefficient1 = likeTermsCase->GetMostSigOp().GetMostSigOp();
+    //         const Real& coefficient2 = likeTermsCase->GetLeastSigOp().GetMostSigOp();
+    //         double realVal = coefficient1.GetValue() + coefficient2.GetValue();
+    //         if(realVal==1.0){
+    //             return leftTerm.Copy();
+    //         } else if(realVal==0.0){
+    //             return std::make_unique<Real>(0.0);
+    //         }
+    //         return std::make_unique<Multiply<Expression>>(Real(realVal), leftTerm);
+    //     }
+    // }
 
     // log(a) + log(b) = log(ab)
     if (auto logCase = Add<Log<Expression, Expression>, Log<Expression, Expression>>::Specialize(simplifiedAdd); logCase != nullptr) {
@@ -60,32 +57,31 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
         }
     }
 
-    // x + x = 2x
-    if (simplifiedAugend->Equals(*simplifiedAddend)) {
-        return Multiply<Real, Expression> { Real { 2.0 }, *simplifiedAugend }.Simplify();
-    }
+    // // x + x = 2x
+    // if (simplifiedAugend->Equals(*simplifiedAddend)) {
+    //     return Multiply<Real, Expression> { Real { 2.0 }, *simplifiedAugend }.Simplify();
+    // }
 
-    // 2x + x = 3x
-    if (const auto likeTermsCase2 = Add<Multiply<Real, Expression>, Expression>::Specialize(simplifiedAdd); likeTermsCase2 != nullptr) {
-        if (likeTermsCase2->GetMostSigOp().GetLeastSigOp().Equals(likeTermsCase2->GetLeastSigOp())) {
-            const Real& coeffiecent = likeTermsCase2->GetMostSigOp().GetMostSigOp();
-            double newCoeffiecentVal = coeffiecent.GetValue() + 1;
-            if (newCoeffiecentVal == 0) {
-                return std::make_unique<Real>(0);
-            }
-            if (newCoeffiecentVal == 1) {
-                return likeTermsCase2->GetMostSigOp().GetLeastSigOp().Copy();
-            }
-            return std::make_unique<Multiply<Real, Expression>>(Real { coeffiecent.GetValue() + 1 }, likeTermsCase2->GetMostSigOp().GetLeastSigOp());
-        }
-    }
+    // // 2x + x = 3x
+    // if (const auto likeTermsCase2 = Add<Multiply<Real, Expression>, Expression>::Specialize(simplifiedAdd); likeTermsCase2 != nullptr) {
+    //     if (likeTermsCase2->GetMostSigOp().GetLeastSigOp().Equals(likeTermsCase2->GetLeastSigOp())) {
+    //         const Real& coeffiecent = likeTermsCase2->GetMostSigOp().GetMostSigOp();
+    //         double newCoeffiecentVal = coeffiecent.GetValue() + 1;
+    //         if (newCoeffiecentVal == 0) {
+    //             return std::make_unique<Real>(0);
+    //         }
+    //         if (newCoeffiecentVal == 1) {
+    //             return likeTermsCase2->GetMostSigOp().GetLeastSigOp().Copy();
+    //         }
+    //         return std::make_unique<Multiply<Real, Expression>>(Real { coeffiecent.GetValue() + 1 }, likeTermsCase2->GetMostSigOp().GetLeastSigOp());
+    //     }
+    // }
     // simplifies expressions and combines like terms
     // ex: 1 + 2x + 3 + 5x = 4 + 7x (or 7x + 4)
     std::vector<std::unique_ptr<Expression>> adds;
     std::vector<std::unique_ptr<Expression>> vals;
     simplifiedAdd.Flatten(adds);
     Util::Complex literalTerms(0);
-    std::cout << "preloop\n";
     for (const auto& addend : adds) {
         // real
         size_t i = 0;
@@ -186,7 +182,6 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
             continue;
         }
     }
-    std::cout << "postloop\n";
 
     // rebuild equation after simplification.
 
@@ -203,17 +198,15 @@ auto Add<Expression>::Simplify() const -> std::unique_ptr<Expression>
             }
         }
     }
-    std::cout << "post build\n";
     if(literalTerms!=0){
         vals.push_back(literalTerms.getExpression());
     }
     if (vals.size() == 0) {
         return std::make_unique<Real>(0);
+    } else if(vals.size() == 1){
+        return std::move(vals[0]);
     }
-    std::cout << "pre vector build\n";
-    auto ret = BuildFromVector<Add>(vals);
-    std::cout << "post vector build\n";
-    return ret;
+    return BuildFromVector<Add>(vals);
 }
 
 auto Add<Expression>::ToString() const -> std::string

@@ -26,11 +26,11 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
     auto simplifiedDivider = leastSigOp->Simplify(); // denominator
     Divide simplifiedDivide { *simplifiedDividend, *simplifiedDivider };
 
-    if (auto realCase = Divide<Real>::Specialize(simplifiedDivide); realCase != nullptr) {
-        const Real& dividend = realCase->GetMostSigOp();
-        const Real& divisor = realCase->GetLeastSigOp();
-        return std::make_unique<Real>(dividend.GetValue() / divisor.GetValue());
-    }
+    // if (auto realCase = Divide<Real>::Specialize(simplifiedDivide); realCase != nullptr) {
+    //     const Real& dividend = realCase->GetMostSigOp();
+    //     const Real& divisor = realCase->GetLeastSigOp();
+    //     return std::make_unique<Real>(dividend.GetValue() / divisor.GetValue());
+    // }
 
     // log(a)/log(b)=log[b](a)
     if (auto logCase = Divide<Log<Expression, Expression>, Log<Expression, Expression>>::Specialize(simplifiedDivide); logCase != nullptr) {
@@ -64,6 +64,20 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
     for (const auto& num : numerator) {
         result.push_back(num->Copy());
     }
+    Util::Complex numLiteral(1);
+    auto maybeLiteral = std::move(result.back());
+    result.pop_back();
+        if (auto real = Real::Specialize(*maybeLiteral); real != nullptr) {
+            numLiteral = real->GetValue();
+        } else if (maybeLiteral->Is<Imaginary>()) {
+            numLiteral = Util::Complex(0,1);
+        } else if (auto complex = Add<Real, Imaginary>::Specialize(*maybeLiteral); complex != nullptr) {
+            numLiteral = Util::Complex(complex->GetMostSigOp().GetValue(),1);
+        } else if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*maybeLiteral); complex != nullptr) {
+            numLiteral = Util::Complex(complex->GetMostSigOp().GetValue(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
+        } else {
+            result.push_back(std::move(maybeLiteral));
+        }
     Util::Complex literalTerms(1);
     for (const auto& denom : denominator) {
         size_t i = 0;
@@ -71,16 +85,16 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
             literalTerms*=real->GetValue();
             continue;
         }
-        if (auto img = Imaginary::Specialize(*denom); img != nullptr) {
+        if (denom->Is<Imaginary>()) {
             literalTerms*=Util::Complex(0,1);
             continue;
         }
         if (auto complex = Add<Real, Imaginary>::Specialize(*denom); complex != nullptr) {
-            literalTerms*=(complex->GetMostSigOp(),1);
+            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),1);
             continue;
         }
         if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*denom); complex != nullptr) {
-            literalTerms*=(complex->GetMostSigOp(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
+            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
             continue;
         }
         if (auto var = Variable::Specialize(*denom); var != nullptr) {
@@ -152,8 +166,9 @@ auto Divide<Expression>::Simplify() const -> std::unique_ptr<Expression>
             result.push_back(Exponent<Expression> { *denom, Real { -1.0 } }.Generalize());
         }
     }
-    if(literalTerms!=1){
-        result.push_back((Util::Complex(1)/literalTerms).getExpression());
+    numLiteral/=literalTerms;
+    if(numLiteral!=1){
+        result.push_back(numLiteral.getExpression());
     }
 
     // rebuild into tree

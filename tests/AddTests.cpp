@@ -65,6 +65,15 @@ TEST_CASE("Log Addition", "[Add][Log]")
     REQUIRE(!goalS.Equals(*addFS));
 }
 
+TEST_CASE("Complex Sum", "[Add][Complex]"){
+    Oasis::Add<> addS{Oasis::Util::pairToComp(2,4),Oasis::Util::pairToComp(-1,5),Oasis::Util::pairToComp(9,2),Oasis::Util::pairToComp(3,2)};
+    auto Simp = addS.Simplify();
+    auto cast = Oasis::Add<Oasis::Real,Oasis::Multiply<Oasis::Real,Oasis::Imaginary>>::Specialize(*Simp);
+    REQUIRE(cast!=nullptr);
+    REQUIRE(cast->GetMostSigOp().GetValue()==13);
+    REQUIRE(cast->GetLeastSigOp().GetMostSigOp().GetValue()==13);
+}
+
 TEST_CASE("Imaginary Add Large Expression", "[Add][Imaginary]")
 {
     Oasis::Add add(Oasis::Add(Oasis::Imaginary(), Oasis::Real(4)), Oasis::Add(Oasis::Variable("z"), Oasis::Imaginary()));

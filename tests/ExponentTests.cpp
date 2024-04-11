@@ -371,8 +371,8 @@ TEST_CASE("Variable with power Multiplication", "[Exponent][Variable][Multiplica
                 Oasis::Variable { "x" },
                 Oasis::Real { 2.0 } } },
         Oasis::Exponent {
-            Oasis::Real { 2.0 },
-            Oasis::Variable { "x" } }
+            Oasis::Variable { "x" },
+            Oasis::Real { 2.0 }}
 
     };
 
@@ -411,6 +411,7 @@ TEST_CASE("Variable with power Multiplication", "[Exponent][Variable][Multiplica
     REQUIRE(Oasis::Multiply<Oasis::Real, Oasis::Exponent<Oasis::Variable, Oasis::Real>> {
         Oasis::Real { 6.0 }, Oasis::Exponent { Oasis::Variable { "x" }, Oasis::Real { 3.0 } } }
                 .Equals(*simplified6));
+    CAPTURE(simplified7->ToString());
     REQUIRE(Oasis::Multiply<Oasis::Real, Oasis::Exponent<Oasis::Variable, Oasis::Real>> {
         Oasis::Real { 3.0 }, Oasis::Exponent { Oasis::Variable { "x" }, Oasis::Real { 4.0 } } }
                 .Equals(*simplified7));
