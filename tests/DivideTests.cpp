@@ -27,6 +27,7 @@ TEST_CASE("Symbolic Change Of Base" "[Divide][Symbolic][Log]"){
     REQUIRE(simplifiedB != nullptr);
     CAPTURE(simplifiedG->ToString());
     REQUIRE(simplifiedG->Equals(Oasis::Log(y,x)));
+    CAPTURE(simplifiedB->ToString());
     REQUIRE(simplifiedB->Equals(divB));
 }
 
@@ -79,215 +80,260 @@ TEST_CASE("Complex over imaginary Division", "[Divide][Complex]")
     REQUIRE(std::abs(simplifiedComplex->GetLeastSigOp().GetMostSigOp().GetValue() + 1) < epsilon);
 }
 
-// TEST_CASE("Division", "[Divide]")
-// {
-//     Oasis::Divide subtract {
-//         Oasis::Divide {
-//             Oasis::Real { 2.0 },
-//             Oasis::Real { 1.0 } },
-//         Oasis::Real { 2.0 }
-//     };
+TEST_CASE("Division", "[Divide]")
+{
+    Oasis::Divide subtract {
+        Oasis::Divide {
+            Oasis::Real { 2.0 },
+            Oasis::Real { 1.0 } },
+        Oasis::Real { 2.0 }
+    };
 
-//     auto simplified = subtract.Simplify();
-//     REQUIRE(simplified->Is<Oasis::Real>());
+    auto simplified = subtract.Simplify();
+    REQUIRE(simplified->Is<Oasis::Real>());
 
-//     auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
-//     REQUIRE(simplifiedReal.GetValue() == 1.0);
-// }
+    auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
+    REQUIRE(simplifiedReal.GetValue() == 1.0);
+}
 
-// TEST_CASE("Symbolic Division, equal variables", "[Division][Symbolic]")
-// {
-//     const Oasis::Divide div {
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Variable { "x" } },
-//         Oasis::Multiply {
-//             Oasis::Real { 1.0 },
-//             Oasis::Variable { "x" } }
-//     };
+TEST_CASE("Symbolic Division, equal variables", "[Division][Symbolic]")
+{
+    const Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Variable { "x" } },
+        Oasis::Multiply {
+            Oasis::Real { 1.0 },
+            Oasis::Variable { "x" } }
+    };
 
 
-//     const Oasis::Divide div2 {
-//         Oasis::Multiply<> {
-//             Oasis::Real { 2.0 },
-//             Oasis::Variable{ "z" },
-//             Oasis::Variable{ "y" },
-//             Oasis::Variable{ "x" }
-//         },
-//         Oasis::Multiply<> {
-//             Oasis::Real { 1.0 },
-//             Oasis::Variable{ "y" },
-//             Oasis::Variable{ "x" },
-//             Oasis::Variable{ "z" }
-//             }
-//         };
+    const Oasis::Divide div2 {
+        Oasis::Multiply<> {
+            Oasis::Real { 2.0 },
+            Oasis::Variable{ "z" },
+            Oasis::Variable{ "y" },
+            Oasis::Variable{ "x" }
+        },
+        Oasis::Multiply<> {
+            Oasis::Real { 1.0 },
+            Oasis::Variable{ "y" },
+            Oasis::Variable{ "x" },
+            Oasis::Variable{ "z" }
+            }
+        };
 
-//     auto simplified = div.Simplify();
-//     REQUIRE(simplified);
-//     REQUIRE(simplified->Equals(Oasis::Real { 2.0 }));
+    auto simplified = div.Simplify();
+    REQUIRE(simplified);
+    CAPTURE(simplified->ToString());
+    REQUIRE(simplified->Equals(Oasis::Real { 2.0 }));
 
-//     auto simplified2 = div2.Simplify();
-//     REQUIRE(simplified2);
-//     REQUIRE(simplified2->Equals(Oasis::Real { 2.0 }));
-// }
+    auto simplified2 = div2.Simplify();
+    REQUIRE(simplified2);
+    REQUIRE(simplified2->Equals(Oasis::Real { 2.0 }));
+}
 
-// TEST_CASE("Symbolic Division, unequal variables", "[Division][Symbolic]")
-// {
-//     Oasis::Divide div {
-//         Oasis::Multiply {
-//             Oasis::Real { 4.0 },
-//             Oasis::Multiply {
-//                 Oasis::Variable { "z" },
-//                 Oasis::Variable { "x" } } },
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Multiply {
-//                 Oasis::Variable { "y" },
-//                 Oasis::Variable { "z" } } }
-//     };
+TEST_CASE("Concrete complex division", "[Division][Complex]")
+{
+    const Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Imaginary()},
+        Oasis::Add {
+            Oasis::Real { 1.0 },
+            Oasis::Imaginary() }
+    };
+    auto simp = div.Simplify();
+    REQUIRE(simp);
+    CAPTURE(simp->Equals(Oasis::Add(Oasis::Real(1),Oasis::Imaginary())));
+}
 
-//     auto simplified = div.Simplify();
 
-//     CAPTURE(simplified->ToString());
-//     REQUIRE(Oasis::Divide {
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Variable { "x" } },
-//         Oasis::Variable { "y" } }
-//                 .Equals(*simplified));
-// }
+TEST_CASE("Symbolic Division, unequal variables", "[Division][Symbolic]")
+{
+    Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Real { 4.0 },
+            Oasis::Multiply {
+                Oasis::Variable { "z" },
+                Oasis::Variable { "x" } } },
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Multiply {
+                Oasis::Variable { "y" },
+                Oasis::Variable { "z" } } }
+    };
 
-// TEST_CASE("Symbolic Division of Expressions", "[Division][Symbolic]")
-// {
-//     // 4(z^2+1)(x+1)/2(x+1)=2(z^2+1)
+    auto simplified = div.Simplify();
 
-//     Oasis::Divide div {
-//         Oasis::Multiply {
-//             Oasis::Multiply {
-//                 Oasis::Add {
-//                     Oasis::Variable { "x" },
-//                     Oasis::Real { 1 } },
-//                 Oasis::Add {
-//                     Oasis::Exponent {
-//                         Oasis::Variable { "z" },
-//                         Oasis::Real { 2 } },
-//                     Oasis::Real { 1 } } },
-//             Oasis::Real { 4.0 } },
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Add {
-//                 Oasis::Variable { "x" },
-//                 Oasis::Real { 1 } } }
-//     };
+    CAPTURE(simplified->ToString());
+    REQUIRE(Oasis::Divide {
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Variable { "x" } },
+        Oasis::Variable { "y" } }
+                .Equals(*simplified));
+}
 
-//     auto simplified = div.Simplify();
+TEST_CASE("Symbolic Division, Power variables", "[Division][Symbolic]")
+{
+    const Oasis::Variable x("x");
+    const Oasis::Variable y("y");
+    const Oasis::Variable z("z");
+    Oasis::Divide div {
+        Oasis::Multiply <> {z,Oasis::Exponent(z,Oasis::Real(2)),x,Oasis::Exponent(y,Oasis::Real(2))},
+        Oasis::Multiply <>{
+            Oasis::Real { 2.0 },
+            Oasis::Exponent(x,Oasis::Real(2)),
+            Oasis::Exponent(x,Oasis::Real(2)),
+            y,
+            x
+        }
+    };
 
-//     CAPTURE(simplified->ToString());
-//     REQUIRE(Oasis::Multiply {
-//         Oasis::Real { 2 },
-//         Oasis::Add {
-//             Oasis::Exponent {
-//                 Oasis::Variable { "z" },
-//                 Oasis::Real { 2 } },
-//             Oasis::Real { 1 } },
-//     }
-//                 .Equals(*simplified));
-// }
+    auto simplified = div.Simplify();
+    REQUIRE(simplified);
+    CAPTURE(simplified->ToString());
+    REQUIRE(Oasis::Divide {
+        Oasis::Multiply<> {
+            Oasis::Real { 0.5 },
+            Oasis::Exponent(z,Oasis::Real(3)),
+            y},
+            Oasis::Exponent(x,Oasis::Real(4))}
+                .Equals(*simplified));
+}
 
-// TEST_CASE("Symbolic Division, unequal exponents", "[Division][Symbolic]")
-// {
-//     Oasis::Divide div {
-//         Oasis::Multiply {
-//             Oasis::Real { 4.0 },
-//             Oasis::Exponent {
-//                 Oasis::Variable { "z" },
-//                 Oasis::Real { 2 } } },
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Multiply {
-//                 Oasis::Variable { "y" },
-//                 Oasis::Variable { "z" } } }
-//     };
+TEST_CASE("Symbolic Division of Expressions", "[Division][Symbolic]")
+{
+    // 4(z^2+1)(x+1)/2(x+1)=2(z^2+1)
 
-//     auto simplified = div.Simplify();
+    Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Multiply {
+                Oasis::Add {
+                    Oasis::Variable { "x" },
+                    Oasis::Real { 1 } },
+                Oasis::Add {
+                    Oasis::Exponent {
+                        Oasis::Variable { "z" },
+                        Oasis::Real { 2 } },
+                    Oasis::Real { 1 } } },
+            Oasis::Real { 4.0 } },
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Add {
+                Oasis::Variable { "x" },
+                Oasis::Real { 1 } } }
+    };
 
-//     CAPTURE(simplified->ToString());
-//     REQUIRE(Oasis::Divide {
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Variable { "z" } },
-//         Oasis::Variable { "y" } }
-//                 .Equals(*simplified));
-// }
+    auto simplified = div.Simplify();
 
-// TEST_CASE("Symbolic Division, equal exponents", "[Division][Symbolic]")
-// {
-//     Oasis::Divide div {
-//         Oasis::Multiply {
-//             Oasis::Real { 4.0 },
-//             Oasis::Exponent {
-//                 Oasis::Variable { "z" },
-//                 Oasis::Real { 3 } } },
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Multiply {
-//                 Oasis::Variable { "y" },
-//                 Oasis::Variable { "z" } } }
-//     };
+    CAPTURE(simplified->ToString());
+    REQUIRE(Oasis::Multiply {
+        Oasis::Real { 2 },
+        Oasis::Add {
+            Oasis::Exponent {
+                Oasis::Variable { "z" },
+                Oasis::Real { 2 } },
+            Oasis::Real { 1 } },
+    }
+                .Equals(*simplified));
+}
 
-//     auto simplified = div.Simplify();
+TEST_CASE("Symbolic Division, unequal exponents", "[Division][Symbolic]")
+{
+    Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Real { 4.0 },
+            Oasis::Exponent {
+                Oasis::Variable { "z" },
+                Oasis::Real { 2 } } },
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Multiply {
+                Oasis::Variable { "y" },
+                Oasis::Variable { "z" } } }
+    };
 
-//     CAPTURE(simplified->ToString());
-//     REQUIRE(Oasis::Divide {
-//         Oasis::Multiply {
-//             Oasis::Real { 2.0 },
-//             Oasis::Exponent {
-//                 Oasis::Variable { "z" },
-//                 Oasis::Real { 2 } } },
-//         Oasis::Variable { "y" } }
-//                 .Equals(*simplified));
-// }
+    auto simplified = div.Simplify();
 
-// TEST_CASE("Generalized Division", "[Divide][Generalized]")
-// {
-//     Oasis::Divide<Oasis::Expression> subtract {
-//         Oasis::Divide<Oasis::Expression> {
-//             Oasis::Real { 2.0 },
-//             Oasis::Real { 1.0 } },
-//         Oasis::Real { 2.0 }
-//     };
+    CAPTURE(simplified->ToString());
+    REQUIRE(Oasis::Divide {
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Variable { "z" } },
+        Oasis::Variable { "y" } }
+                .Equals(*simplified));
+}
 
-//     auto simplified = subtract.Simplify();
-//     REQUIRE(simplified->Is<Oasis::Real>());
+TEST_CASE("Symbolic Division, equal exponents", "[Division][Symbolic]")
+{
+    Oasis::Divide div {
+        Oasis::Multiply {
+            Oasis::Real { 4.0 },
+            Oasis::Exponent {
+                Oasis::Variable { "z" },
+                Oasis::Real { 3 } } },
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Multiply {
+                Oasis::Variable { "y" },
+                Oasis::Variable { "z" } } }
+    };
 
-//     auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
-//     REQUIRE(simplifiedReal.GetValue() == 1.0);
-// }
+    auto simplified = div.Simplify();
 
-// TEST_CASE("Division Async", "[Divide][Async]")
-// {
-//     Oasis::Divide subtract {
-//         Oasis::Divide {
-//             Oasis::Real { 2.0 },
-//             Oasis::Real { 1.0 } },
-//         Oasis::Real { 2.0 }
-//     };
+    CAPTURE(simplified->ToString());
+    REQUIRE(Oasis::Divide {
+        Oasis::Multiply {
+            Oasis::Real { 2.0 },
+            Oasis::Exponent {
+                Oasis::Variable { "z" },
+                Oasis::Real { 2 } } },
+        Oasis::Variable { "y" } }
+                .Equals(*simplified));
+}
 
-//     std::unique_ptr<Oasis::Expression> simplified = subtract.SimplifyAsync();
-//     REQUIRE(simplified->Is<Oasis::Real>());
+TEST_CASE("Generalized Division", "[Divide][Generalized]")
+{
+    Oasis::Divide<Oasis::Expression> subtract {
+        Oasis::Divide<Oasis::Expression> {
+            Oasis::Real { 2.0 },
+            Oasis::Real { 1.0 } },
+        Oasis::Real { 2.0 }
+    };
 
-//     auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
-//     REQUIRE(simplifiedReal.GetValue() == 1.0);
-// }
+    auto simplified = subtract.Simplify();
+    REQUIRE(simplified->Is<Oasis::Real>());
 
-// TEST_CASE("Divide Operator Overload", "[Divide][Operator Overload]")
-// {
-//     const std::unique_ptr<Oasis::Expression> a = std::make_unique<Oasis::Real>(1.0);
-//     const std::unique_ptr<Oasis::Expression> b = std::make_unique<Oasis::Real>(2.0);
+    auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
+    REQUIRE(simplifiedReal.GetValue() == 1.0);
+}
 
-//     const auto sum = b / a;
-//     auto realSum = Oasis::Real::Specialize(*sum);
+TEST_CASE("Division Async", "[Divide][Async]")
+{
+    Oasis::Divide subtract {
+        Oasis::Divide {
+            Oasis::Real { 2.0 },
+            Oasis::Real { 1.0 } },
+        Oasis::Real { 2.0 }
+    };
 
-//     REQUIRE(realSum != nullptr);
-//     REQUIRE(realSum->GetValue() == 2.0);
-// }
+    std::unique_ptr<Oasis::Expression> simplified = subtract.SimplifyAsync();
+    REQUIRE(simplified->Is<Oasis::Real>());
+
+    auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
+    REQUIRE(simplifiedReal.GetValue() == 1.0);
+}
+
+TEST_CASE("Divide Operator Overload", "[Divide][Operator Overload]")
+{
+    const std::unique_ptr<Oasis::Expression> a = std::make_unique<Oasis::Real>(1.0);
+    const std::unique_ptr<Oasis::Expression> b = std::make_unique<Oasis::Real>(2.0);
+
+    const auto sum = b / a;
+    auto realSum = Oasis::Real::Specialize(*sum);
+
+    REQUIRE(realSum != nullptr);
+    REQUIRE(realSum->GetValue() == 2.0);
+}

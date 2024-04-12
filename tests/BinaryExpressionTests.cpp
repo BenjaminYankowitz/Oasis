@@ -8,6 +8,14 @@
 #include "Oasis/Real.hpp"
 #include "Oasis/Variable.hpp"
 
+
+TEST_CASE("Substiute Variables", "[Symbolic]"){
+    Oasis::Add add {Oasis::Variable("A"),Oasis::Variable("B")};
+    auto res = add.SubstituteVariable(Oasis::Variable("A"),Oasis::Variable("C"));
+    REQUIRE(res!=nullptr);
+    REQUIRE(res->Equals(Oasis::Add({Oasis::Variable("C"),Oasis::Variable("B")})));
+}
+
 TEST_CASE("Specialize Considers Commutative Property", "[Symbolic]")
 {
     Oasis::Add add {

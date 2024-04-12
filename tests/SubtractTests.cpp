@@ -8,6 +8,8 @@
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Subtract.hpp"
+#include "Oasis/Variable.hpp"
+#include <memory>
 
 TEST_CASE("Subtraction", "[Subtract]")
 {
@@ -24,6 +26,48 @@ TEST_CASE("Subtraction", "[Subtract]")
     auto simplifiedReal = dynamic_cast<Oasis::Real&>(*simplified);
     REQUIRE(simplifiedReal.GetValue() == -4.0);
 }
+
+TEST_CASE("Subtraction Print", "[Subtract][Pinrt]")
+{
+    Oasis::Subtract<Oasis::Expression> sub1 (Oasis::Variable("x"),Oasis::Variable("y"));
+    Oasis::Subtract<Oasis::Variable> sub2 (Oasis::Variable("x"),Oasis::Variable("y"));
+    std::string expected = "(x - y)";
+    REQUIRE(sub1.ToString() == expected);
+    REQUIRE(sub2.ToString() == expected);
+    REQUIRE(sub1.ToString() == sub2.ToString());
+}
+
+TEST_CASE("Subtraction Specialization", "[Subtract][Specialization]")
+{
+    std::unique_ptr<Oasis::Expression> nSub = std::make_unique<Oasis::Real>(1.0);
+    std::unique_ptr<Oasis::Expression> sub1 = std::make_unique<Oasis::Subtract<Oasis::Expression>>(Oasis::Real(1.0),Oasis::Real(2.0));
+    std::unique_ptr<Oasis::Expression> sub2 = std::make_unique<Oasis::Subtract<Oasis::Expression>>(Oasis::Variable("x"),Oasis::Real(2.0));
+    std::unique_ptr<Oasis::Expression> sub3 =  std::make_unique<Oasis::Subtract<Oasis::Expression>>(Oasis::Real(1.0),Oasis::Variable("x"));
+    REQUIRE(Oasis::Subtract<Oasis::Expression>::Specialize(*nSub)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real>::Specialize(*nSub)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real,Oasis::Variable>::Specialize(*nSub)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Real>::Specialize(*nSub)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Variable>::Specialize(*nSub)==nullptr);
+    
+    REQUIRE(Oasis::Subtract<Oasis::Expression>::Specialize(*sub1)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real>::Specialize(*sub1)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real,Oasis::Variable>::Specialize(*sub1)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Real>::Specialize(*sub1)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable>::Specialize(*sub1)==nullptr);
+
+    REQUIRE(Oasis::Subtract<Oasis::Expression>::Specialize(*sub2)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real>::Specialize(*sub2)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real,Oasis::Variable>::Specialize(*sub2)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Real>::Specialize(*sub2)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Variable>::Specialize(*sub2)==nullptr);
+
+    REQUIRE(Oasis::Subtract<Oasis::Expression>::Specialize(*sub3)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real>::Specialize(*sub3)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Real,Oasis::Variable>::Specialize(*sub3)!=nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Real>::Specialize(*sub3)==nullptr);
+    REQUIRE(Oasis::Subtract<Oasis::Variable,Oasis::Variable>::Specialize(*sub3)==nullptr);
+}
+
 
 TEST_CASE("Generalized Subtraction", "[Subtract][Generalized]")
 {

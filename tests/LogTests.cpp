@@ -16,7 +16,11 @@
 #include "Oasis/Undefined.hpp"
 #include <iostream>
 
-double EPSILON = 0.000001;
+constexpr double EPSILON = 0.000001;
+
+TEST_CASE("Simplify Log with null component", "[Log][nullptr]"){
+    REQUIRE(Oasis::Log().Simplify()==nullptr);
+}
 
 TEST_CASE("Log with invalid base", "[Log][Invalid Base]")
 {
