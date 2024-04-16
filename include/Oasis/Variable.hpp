@@ -5,6 +5,7 @@
 #ifndef OASIS_VARIABLE_HPP
 #define OASIS_VARIABLE_HPP
 
+#include <stdexcept>
 #include <string>
 
 #include "LeafExpression.hpp"
@@ -27,7 +28,7 @@ public:
     [[nodiscard]] virtual auto Equals(const Expression& other) const -> bool final;
 
     EXPRESSION_TYPE(Variable)
-    EXPRESSION_CATEGORY(0)
+    EXPRESSION_CATEGORY(UnExp)
 
     /**
      * Gets the name of the variable.
@@ -37,11 +38,12 @@ public:
     [[nodiscard]] auto GetName() const -> std::string;
 
     [[nodiscard]] auto ToString() const -> std::string final;
+    [[nodiscard]] auto Differentiate(const Expression& differentiationVariable) -> std::unique_ptr<Expression> final;
 
     static auto Specialize(const Expression& other) -> std::unique_ptr<Variable>;
     static auto Specialize(const Expression& other, tf::Subflow& subflow) -> std::unique_ptr<Variable>;
-    [[nodiscard]] virtual auto SubstituteVariable(const Expression& var, const Expression& exp) const -> std::unique_ptr<Expression> final;
-
+    [[nodiscard]] virtual auto Substitute(const Expression& var, const Expression& val) const -> std::unique_ptr<Expression> override final;
+    
     auto operator=(const Variable& other) -> Variable& = default;
 
 private:

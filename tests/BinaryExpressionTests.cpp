@@ -5,13 +5,14 @@
 
 #include "Oasis/Add.hpp"
 #include "Oasis/Multiply.hpp"
+#include "Oasis/Negate.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Variable.hpp"
 
 TEST_CASE("Substiute Variables", "[Symbolic]")
 {
     Oasis::Add add { Oasis::Variable("A"), Oasis::Variable("B") };
-    auto res = add.SubstituteVariable(Oasis::Variable("A"), Oasis::Variable("C"));
+    auto res = add.Substitute(Oasis::Variable("A"), Oasis::Variable("C"));
     REQUIRE(res != nullptr);
     REQUIRE(res->Equals(Oasis::Add({ Oasis::Variable("C"), Oasis::Variable("B") })));
 }
@@ -224,4 +225,44 @@ TEST_CASE("Equals follows associativity and commutativity")
 
         REQUIRE(add1.Equals(add2));
     }
+}
+TEST_CASE("Substitute Binary", "[Substitute]")
+{
+    Oasis::Add<Oasis::Multiply<Oasis::Real, Oasis::Variable>> before {
+        Oasis::Multiply<Oasis::Real, Oasis::Variable> {
+            Oasis::Real { 2.0 },
+            Oasis::Variable { "x" } },
+        Oasis::Multiply<Oasis::Real, Oasis::Variable> {
+            Oasis::Real { 3.0 },
+            Oasis::Variable { "x" } }
+    }; // 2x+3x
+
+    auto afterBefore = before.Substitute(Oasis::Variable { "x" }, Oasis::Real { 4.0 }); // after should some std::unique_ptr<Expression> such that it equals 2(4) + 3(4)
+    REQUIRE(afterBefore != nullptr);
+    auto after = afterBefore->Simplify();
+    REQUIRE(after != nullptr);
+    Oasis::Real twenty { 20 };
+    CAPTURE(after->ToString());
+    REQUIRE(after->Equals(twenty));
+}
+
+TEST_CASE("Substitute Unary", "[Substitute]")
+{
+    Oasis::Add<Oasis::Multiply<Oasis::Real, Oasis::Negate<Oasis::Variable>>,
+        Oasis::Multiply<Oasis::Real, Oasis::Variable>>
+        before {
+            Oasis::Multiply<Oasis::Real, Oasis::Negate<Oasis::Variable>> {
+                Oasis::Real { 2.0 },
+                Oasis::Negate { Oasis::Variable { "x" } } },
+            Oasis::Multiply<Oasis::Real, Oasis::Variable> {
+                Oasis::Real { 3.0 },
+                Oasis::Variable { "x" } }
+        }; // 2x+3x
+
+    auto afterBefore = before.Substitute(Oasis::Variable { "x" }, Oasis::Real { 4.0 }); // after should some std::unique_ptr<Expression> such that it equals 2(4) + 3(4)
+    REQUIRE(afterBefore != nullptr);
+    auto after = afterBefore->Simplify();
+    REQUIRE(after != nullptr);
+    Oasis::Real four { 4 };
+    REQUIRE(after->Equals(four));
 }

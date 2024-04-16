@@ -38,6 +38,6 @@ TEST_CASE("Undefined GetType and GetCategory", "[ExpressionType][ExpressionCateg
     Oasis::Undefined u1;
     REQUIRE(u1.GetType() == Oasis::ExpressionType::None);
     REQUIRE(Oasis::Undefined::GetStaticType() == Oasis::ExpressionType::None);
-    REQUIRE(u1.GetCategory() == 0);
-    REQUIRE(Oasis::Undefined::GetStaticCategory() == 0);
+    REQUIRE(u1.GetCategory() == Oasis::ExpressionCategory::UnExp);
+    REQUIRE(Oasis::Undefined::GetStaticCategory() == Oasis::ExpressionCategory::UnExp);
 }

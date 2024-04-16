@@ -3,6 +3,10 @@
 //
 
 #include "Oasis/Variable.hpp"
+#include "Oasis/Add.hpp"
+#include "Oasis/Exponent.hpp"
+#include "Oasis/Multiply.hpp"
+#include "Oasis/Real.hpp"
 
 namespace Oasis {
 
@@ -36,13 +40,30 @@ auto Variable::Specialize(const Expression& other, tf::Subflow&) -> std::unique_
     return other.Is<Variable>() ? std::make_unique<Variable>(dynamic_cast<const Variable&>(other)) : nullptr;
 }
 
-[[nodiscard]] auto Variable::SubstituteVariable(const Expression& var, const Expression& exp) const -> std::unique_ptr<Expression>
+auto Variable::Substitute(const Expression& var, const Expression& val) const -> std::unique_ptr<Expression>
 {
-    if (Equals(var)) {
-        return exp.Copy();
-    } else {
-        return Copy();
+    assert(var.Is<Variable>());
+    if (Equals(var))
+        return val.Copy();
+    return Copy();
+}
+
+auto Variable::Differentiate(const Expression& differentiationVariable) -> std::unique_ptr<Expression>
+{
+    if (auto variable = Variable::Specialize(differentiationVariable); variable != nullptr) {
+
+        // Power rule
+        if (name == (*variable).GetName()) {
+            return std::make_unique<Real>(Real { 1.0f })
+                ->Simplify();
+        }
+
+        // Different variable, treat as constant
+        return std::make_unique<Real>(Real { 0 })
+            ->Simplify();
     }
+
+    return Copy();
 }
 
 } // Oasis

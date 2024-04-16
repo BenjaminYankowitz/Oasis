@@ -29,6 +29,8 @@ enum class ExpressionType {
     Divide,
     Exponent,
     Log,
+    Limit,
+    Derivative,
     Negate,
     Sqrt,
 };
@@ -40,6 +42,8 @@ enum ExpressionCategory : uint32_t {
     None = 0,
     Associative = 1,
     Commutative = 1 << 1,
+    BinExp = 1 << 2,
+    UnExp = 1 << 3,
 };
 
 // clang-format off
@@ -85,6 +89,12 @@ public:
      * @return A copy of this expression.
      */
     virtual auto Copy(tf::Subflow& subflow) const -> std::unique_ptr<Expression> = 0;
+
+    /**
+     * Tries to differentiate this function.
+     * @return the differentiated expression.
+     */
+    [[nodiscard]] virtual auto Differentiate(const Expression&) -> std::unique_ptr<Expression>;
 
     /**
      * Compares this expression to another expression for equality.
@@ -257,15 +267,14 @@ public:
      * @return Whether the two expressions are structurally equivalent.
      */
     [[nodiscard]] auto StructurallyEquivalentAsync(const Expression& other) const -> bool;
-
     /**
-     * The SubstituteVariable function substitues every instantce of a given variable with a given expression.
+     * The Substitute function substitues every instantce of a given variable with a given expression.
      *
      * @tparam var The variable to substitute.
      * @tparam exp The Expression to subsitute the varible with.
      * @return The expression with the variable subsituted with the given expression.
      */
-    [[nodiscard]] virtual auto SubstituteVariable(const Expression& var, const Expression& exp) const -> std::unique_ptr<Expression> = 0;
+    [[nodiscard]] virtual auto Substitute(const Expression& var, const Expression& val) const -> std::unique_ptr<Expression> = 0;
 
     /**
      * Converts this expression to a string.

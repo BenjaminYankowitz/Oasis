@@ -147,7 +147,10 @@ public:
 
         return std::make_unique<DerivedSpecialized>(copy);
     }
-
+    [[nodiscard]] auto Differentiate(const Expression& differentiationVariable) -> std::unique_ptr<Expression> override
+    {
+        return Generalize()->Differentiate(differentiationVariable);
+    }
     [[nodiscard]] auto Equals(const Expression& other) const -> bool final
     {
         if (DerivedGeneralized::GetStaticType() != other.GetType()) {
@@ -327,16 +330,16 @@ public:
         return mostSigOpEquivalent && leastSigOpEquivalent;
     }
 
-    [[nodiscard]] virtual auto SubstituteVariable(const Expression& var, const Expression& exp) const -> std::unique_ptr<Expression> override
+    [[nodiscard]] virtual auto Substitute(const Expression& var, const Expression& val) const -> std::unique_ptr<Expression> override
     {
         DerivedGeneralized generalized;
 
         if (mostSigOp) {
-            generalized.SetMostSigOp(*mostSigOp->SubstituteVariable(var, exp));
+            generalized.SetMostSigOp(*mostSigOp->Substitute(var, val));
         }
 
         if (leastSigOp) {
-            generalized.SetLeastSigOp(*leastSigOp->SubstituteVariable(var, exp));
+            generalized.SetLeastSigOp(*leastSigOp->Substitute(var, val));
         }
 
         return std::make_unique<DerivedGeneralized>(generalized);
@@ -486,7 +489,6 @@ public:
             this->leastSigOp = std::move(op);
         }
     }
-
     /**
      * Swaps the operands of this expression.
      * @return A new expression with the operands swapped.
@@ -509,7 +511,6 @@ protected:
         if (!other.Is<Oasis::Derived>()) {                                                                               \
             return nullptr;                                                                                              \
         }                                                                                                                \
-                                                                                                                         \
         auto specialized = std::make_unique<Derived<FirstOp, SecondOp>>();                                               \
                                                                                                                          \
         std::unique_ptr<Expression> otherGeneralized = other.Generalize();                                               \

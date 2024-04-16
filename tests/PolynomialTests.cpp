@@ -78,7 +78,7 @@ TEST_CASE("7th degree polynomial with complex rational roots", "[factor][duplica
     auto zeros = add->FindZeros();
     REQUIRE(zeros.size() == 6);
     for (auto& i : zeros) {
-        auto sub = add->SubstituteVariable(var, *i->Simplify());
+        auto sub = add->Substitute(var, *i->Simplify());
         auto simplified = sub->Simplify();
         REQUIRE(Oasis::Util::abs(*simplified).GetValue() < epsilon);
     }
@@ -141,7 +141,7 @@ TEST_CASE("irrational cubic", "[cubicFormula]")
     auto zeros = add->FindZeros();
     REQUIRE(zeros.size() == 3);
     for (auto& i : zeros) {
-        auto sub = add->SubstituteVariable(var, *i->Simplify());
+        auto sub = add->Substitute(var, *i->Simplify());
         auto simplified = sub->Simplify();
         REQUIRE(Oasis::Util::abs(*simplified).GetValue() < epsilon);
     }
@@ -213,7 +213,7 @@ TEST_CASE("irrational quartic", "[quarticFormula]")
     auto zeros = add->FindZeros();
     REQUIRE(zeros.size() == 4);
     for (auto& i : zeros) {
-        auto simplified = add->SubstituteVariable(var, *i)->Simplify();
+        auto simplified = add->Substitute(var, *i)->Simplify();
         REQUIRE(Oasis::Util::abs(*simplified).GetValue() < epsilon);
     }
 }

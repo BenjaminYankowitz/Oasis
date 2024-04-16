@@ -63,9 +63,9 @@ TEST_CASE("Negate GetType and GetCategory", "[ExpressionType][ExpressionCategory
     REQUIRE(u1.GetType() == Oasis::ExpressionType::Negate);
     REQUIRE(Oasis::Negate<Oasis::Expression>::GetStaticType() == Oasis::ExpressionType::Negate);
     REQUIRE(Oasis::Negate<Oasis::Real>::GetStaticType() == Oasis::ExpressionType::Negate);
-    REQUIRE(u1.GetCategory() == 0);
-    REQUIRE(Oasis::Negate<Oasis::Expression>::GetStaticCategory() == 0);
-    REQUIRE(Oasis::Negate<Oasis::Real>::GetStaticCategory() == 0);
+    REQUIRE(u1.GetCategory() == Oasis::ExpressionCategory::UnExp);
+    REQUIRE(Oasis::Negate<Oasis::Expression>::GetStaticCategory() == Oasis::ExpressionCategory::UnExp);
+    REQUIRE(Oasis::Negate<Oasis::Real>::GetStaticCategory() == Oasis::ExpressionCategory::UnExp);
 }
 
 TEST_CASE("Negate Substitute Variable", "[Negate][Variable]")
@@ -73,7 +73,7 @@ TEST_CASE("Negate Substitute Variable", "[Negate][Variable]")
     const Oasis::Variable x("x");
     const Oasis::Real rVal(2.0);
     Oasis::Negate u1(x);
-    auto subbed = u1.SubstituteVariable(x, rVal);
+    auto subbed = u1.Substitute(x, rVal);
     REQUIRE(subbed != nullptr);
     REQUIRE(subbed->Equals(Oasis::Negate(Oasis::Real(2.0))));
 }
