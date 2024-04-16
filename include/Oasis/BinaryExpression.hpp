@@ -150,7 +150,7 @@ public:
 
     [[nodiscard]] auto Equals(const Expression& other) const -> bool final
     {
-        if (this->GetType() != other.GetType()) {
+        if (DerivedGeneralized::GetStaticType() != other.GetType()) {
             return false;
         }
 
@@ -179,7 +179,7 @@ public:
             return true;
         }
 
-        if (!(this->GetCategory() & Associative)) {
+        if constexpr (!(DerivedGeneralized::GetStaticCategory() & Associative)) {
             return false;
         }
 
@@ -262,7 +262,7 @@ public:
 
     [[nodiscard]] auto StructurallyEquivalent(const Expression& other) const -> bool override
     {
-        if (this->GetType() != other.GetType()) {
+        if (DerivedGeneralized::GetStaticType() != other.GetType()) {
             return false;
         }
 
@@ -290,7 +290,7 @@ public:
 
     auto StructurallyEquivalent(const Expression& other, tf::Subflow& subflow) const -> bool override
     {
-        if (this->GetType() != other.GetType()) {
+        if (DerivedGeneralized::GetStaticType() != other.GetType()) {
             return false;
         }
 
@@ -531,7 +531,7 @@ protected:
             return specialized;                                                                                          \
         }                                                                                                                \
                                                                                                                          \
-        if (!(other.GetCategory() & Commutative)) {                                                                      \
+        if constexpr (!(Derived<FirstOp, SecondOp>::GetStaticCategory() & Commutative)) {                                \
             return nullptr;                                                                                              \
         }                                                                                                                \
                                                                                                                          \

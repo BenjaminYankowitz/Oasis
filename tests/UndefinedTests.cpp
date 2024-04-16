@@ -1,5 +1,5 @@
 //
-// Created by Matthew McCall on 8/7/23.
+//
 //
 #include "catch2/catch_test_macros.hpp"
 
@@ -20,7 +20,7 @@ TEST_CASE("Undefined Equals", "[Equals][Copy Constructor][assignment operator]")
 TEST_CASE("Undefined ToString", "[toString]")
 {
     Oasis::Undefined u1;
-    REQUIRE(u1.ToString()=="Undefined");
+    REQUIRE(u1.ToString() == "Undefined");
 }
 
 TEST_CASE("Undefined Specailize", "[Specailize]")
@@ -29,15 +29,15 @@ TEST_CASE("Undefined Specailize", "[Specailize]")
     Oasis::Undefined u1;
     Oasis::Expression& definedValue = rVal;
     Oasis::Expression& undefinedValue = u1;
-    REQUIRE(Oasis::Undefined::Specialize(definedValue)==nullptr);
-    REQUIRE(Oasis::Undefined::Specialize(undefinedValue)!=nullptr);
+    REQUIRE(Oasis::Undefined::Specialize(definedValue) == nullptr);
+    REQUIRE(Oasis::Undefined::Specialize(undefinedValue) != nullptr);
 }
 
 TEST_CASE("Undefined GetType and GetCategory", "[ExpressionType][ExpressionCategory]")
 {
     Oasis::Undefined u1;
-    REQUIRE(u1.GetType()==Oasis::ExpressionType::None);
-    REQUIRE(Oasis::Undefined::GetStaticType()==Oasis::ExpressionType::None);
-    REQUIRE(u1.GetCategory()==0);
-    REQUIRE(Oasis::Undefined::GetStaticCategory()==0);
+    REQUIRE(u1.GetType() == Oasis::ExpressionType::None);
+    REQUIRE(Oasis::Undefined::GetStaticType() == Oasis::ExpressionType::None);
+    REQUIRE(u1.GetCategory() == 0);
+    REQUIRE(Oasis::Undefined::GetStaticCategory() == 0);
 }

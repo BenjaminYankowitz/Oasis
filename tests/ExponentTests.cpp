@@ -8,11 +8,40 @@
 #include "Oasis/Divide.hpp"
 #include "Oasis/Exponent.hpp"
 #include "Oasis/Imaginary.hpp"
+#include "Oasis/Log.hpp"
 #include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
 #include "Oasis/Subtract.hpp"
 #include "Oasis/Util.hpp"
 #include "Oasis/Variable.hpp"
+
+TEST_CASE("a^b^c = a^bc", "[Exponent]")
+{
+    const Oasis::Variable x("x");
+    const Oasis::Variable y("y");
+    const Oasis::Variable z("z");
+    Oasis::Exponent exp(Oasis::Exponent(x, y), z);
+    Oasis::Exponent goal(x, Oasis::Multiply(y, z));
+    auto simp = exp.Simplify();
+    REQUIRE(simp != nullptr);
+    REQUIRE(simp->Equals(goal));
+}
+
+TEST_CASE("Expoenent log inverse", "[Exponent][Log]")
+{
+    const Oasis::Variable x("x");
+    const Oasis::Variable y("y");
+    const Oasis::Variable z("z");
+    Oasis::Exponent exp(x, Oasis::Log(x, y));
+    auto simp = exp.Simplify();
+    REQUIRE(simp != nullptr);
+    REQUIRE(simp->Equals(y));
+
+    Oasis::Exponent exp2(x, Oasis::Log(z, y));
+    auto simp2 = exp2.Simplify();
+    REQUIRE(simp2 != nullptr);
+    REQUIRE(simp2->Equals(exp2));
+}
 
 TEST_CASE("Complex to real", "[Exponent][complex]")
 {
@@ -372,7 +401,7 @@ TEST_CASE("Variable with power Multiplication", "[Exponent][Variable][Multiplica
                 Oasis::Real { 2.0 } } },
         Oasis::Exponent {
             Oasis::Variable { "x" },
-            Oasis::Real { 2.0 }}
+            Oasis::Real { 2.0 } }
 
     };
 
@@ -472,8 +501,8 @@ TEST_CASE("Subtraction of Exponents", "[Subtract][Exponent][Symbolic]")
     auto simplified4 = sub4.Simplify();
     REQUIRE(Oasis::Real { 0.0 }.Equals(*simplified));
     REQUIRE(Oasis::Exponent {
-            Oasis::Variable { "x" },
-            Oasis::Real { 2.0 } }
+        Oasis::Variable { "x" },
+        Oasis::Real { 2.0 } }
                 .Equals(*simplified2));
     REQUIRE(Oasis::Multiply {
         Oasis::Real { -1.0 },

@@ -190,6 +190,12 @@ public:
         return GetType() == T<Expression, Expression>::GetStaticType();
     }
 
+    template <template <typename> typename T>
+    [[nodiscard]] bool Is() const
+    {
+        return GetType() == T<Expression>::GetStaticType();
+    }
+
     /**
      * Simplifies this expression.
      * @return The simplified expression.
@@ -270,15 +276,15 @@ public:
     virtual ~Expression() = default;
 };
 
-#define EXPRESSION_TYPE(type)                       \
-    auto GetType() const -> ExpressionType override \
-    {                                               \
-        return ExpressionType::type;                \
-    }                                               \
-                                                    \
-    static auto GetStaticType() -> ExpressionType   \
-    {                                               \
-        return ExpressionType::type;                \
+#define EXPRESSION_TYPE(type)                               \
+    auto GetType() const -> ExpressionType override         \
+    {                                                       \
+        return ExpressionType::type;                        \
+    }                                                       \
+                                                            \
+    constexpr static auto GetStaticType() -> ExpressionType \
+    {                                                       \
+        return ExpressionType::type;                        \
     }
 
 #define EXPRESSION_CATEGORY(category)                     \

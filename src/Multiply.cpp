@@ -183,20 +183,20 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
     for (const auto& multiplicand : multiplies) {
         size_t i = 0;
         if (auto real = Real::Specialize(*multiplicand); real != nullptr) {
-            literalTerms*=real->GetValue();
+            literalTerms *= real->GetValue();
             continue;
         }
         // single i
         if (auto img = Imaginary::Specialize(*multiplicand); img != nullptr) {
-            literalTerms*=Util::Complex(0,1);
+            literalTerms *= Util::Complex(0, 1);
             continue;
         }
         if (auto complex = Add<Real, Imaginary>::Specialize(*multiplicand); complex != nullptr) {
-            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),1);
+            literalTerms *= Util::Complex(complex->GetMostSigOp().GetValue(), 1);
             continue;
         }
         if (auto complex = Add<Real, Multiply<Real, Imaginary>>::Specialize(*multiplicand); complex != nullptr) {
-            literalTerms*=Util::Complex(complex->GetMostSigOp().GetValue(),complex->GetLeastSigOp().GetMostSigOp().GetValue());
+            literalTerms *= Util::Complex(complex->GetMostSigOp().GetValue(), complex->GetLeastSigOp().GetMostSigOp().GetValue());
             continue;
         }
         // expr^n
@@ -241,13 +241,13 @@ auto Multiply<Expression>::Simplify() const -> std::unique_ptr<Expression>
             }
         }
     }
-    
-    if(literalTerms!=1){
+
+    if (literalTerms != 1) {
         vals.push_back(literalTerms.getExpression());
     }
     if (vals.size() == 0) {
         return std::make_unique<Real>(1.0);
-    } else if(vals.size() == 1){
+    } else if (vals.size() == 1) {
         return std::move(vals[0]);
     }
     auto ret = BuildFromVector<Multiply>(vals);

@@ -44,3 +44,6 @@ add_subdirectory(src)
 if(OASIS_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
+
+add_compile_options( -fsanitize=undefined -B /usr/bin/ldd)
+add_link_options( -fsanitize=undefined -B /usr/bin/ldd)

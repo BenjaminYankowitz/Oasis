@@ -99,7 +99,8 @@ TEST_CASE("imaginary linear polynomial")
     }
 }
 
-TEST_CASE("irrational linear", "[linearFormula]"){
+TEST_CASE("irrational linear", "[linearFormula]")
+{
     const double epsilon = std::pow(10, -5);
     Oasis::Add add {
         Oasis::Real(1.3),
@@ -110,7 +111,7 @@ TEST_CASE("irrational linear", "[linearFormula]"){
     if (zeros.size() == 1) {
         auto root = Oasis::Real::Specialize(*zeros[0]->Simplify());
         REQUIRE(root != nullptr);
-        REQUIRE(std::abs(root->GetValue()+1.3) < epsilon);
+        REQUIRE(std::abs(root->GetValue() + 1.3) < epsilon);
     }
 }
 

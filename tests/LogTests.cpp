@@ -5,21 +5,22 @@
 #include "catch2/catch_test_macros.hpp"
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "Oasis/Log.hpp"
-#include "Oasis/Exponent.hpp"
 #include "Oasis/Add.hpp"
-#include "Oasis/Subtract.hpp"
-#include "Oasis/Multiply.hpp"
 #include "Oasis/Divide.hpp"
+#include "Oasis/Exponent.hpp"
+#include "Oasis/Log.hpp"
+#include "Oasis/Multiply.hpp"
 #include "Oasis/Real.hpp"
-#include "Oasis/Variable.hpp"
+#include "Oasis/Subtract.hpp"
 #include "Oasis/Undefined.hpp"
+#include "Oasis/Variable.hpp"
 #include <iostream>
 
 constexpr double EPSILON = 0.000001;
 
-TEST_CASE("Simplify Log with null component", "[Log][nullptr]"){
-    REQUIRE(Oasis::Log().Simplify()==nullptr);
+TEST_CASE("Simplify Log with null component", "[Log][nullptr]")
+{
+    REQUIRE(Oasis::Log().Simplify() == nullptr);
 }
 
 TEST_CASE("Log with invalid base", "[Log][Invalid Base]")
@@ -53,7 +54,7 @@ TEST_CASE("Log with invalid argument", "[Log][Invalid Argument]")
 
 TEST_CASE("Log of Real Numbers", "[Log][Real]")
 {
-    //log[5](1) = 0
+    // log[5](1) = 0
     Oasis::Log base5of1 {
         Oasis::Real { 5.0 },
         Oasis::Real { 1.0 }
@@ -64,8 +65,8 @@ TEST_CASE("Log of Real Numbers", "[Log][Real]")
 
     auto simplifiedReal5_1 = dynamic_cast<Oasis::Real&>(*base5of1_Simplified);
     REQUIRE(simplifiedReal5_1.GetValue() == 0.0);
-    
-    //log[5](5) = 1
+
+    // log[5](5) = 1
     Oasis::Log base5of5 {
         Oasis::Real { 5.0 },
         Oasis::Real { 5.0 }
@@ -77,7 +78,7 @@ TEST_CASE("Log of Real Numbers", "[Log][Real]")
     auto simplifiedReal5_5 = dynamic_cast<Oasis::Real&>(*base5of5_Simplified);
     REQUIRE_THAT(simplifiedReal5_5.GetValue(), Catch::Matchers::WithinAbs(1.0, EPSILON));
 
-    //log[5](25) = 2
+    // log[5](25) = 2
     Oasis::Log base5of25 {
         Oasis::Real { 5.0 },
         Oasis::Real { 25.0 }
@@ -92,33 +93,30 @@ TEST_CASE("Log of Real Numbers", "[Log][Real]")
 
 TEST_CASE("Log of Exponentiation", "[Log][Exponent]")
 {
-    //log[5](5^x) = x
+    // log[5](5^x) = x
     Oasis::Log base5of5toX {
         Oasis::Real { 5.0 },
         Oasis::Exponent {
-             Oasis::Real { 5.0 },
-             Oasis::Variable { "x" }
-        }
+            Oasis::Real { 5.0 },
+            Oasis::Variable { "x" } }
     };
 
     auto base5of5toX_Simplified = base5of5toX.Simplify();
     REQUIRE((base5of5toX_Simplified->Is<Oasis::Variable>() || (base5of5toX_Simplified->ToString() == "(x * 1.000000)")));
-    
-    //log[5](x^x) = xlog[5](x)
+
+    // log[5](x^x) = xlog[5](x)
     Oasis::Log logOfExp {
         Oasis::Real { 5.0 },
         Oasis::Exponent {
-             Oasis::Variable { "x" },
-             Oasis::Variable { "x" }
-        }
+            Oasis::Variable { "x" },
+            Oasis::Variable { "x" } }
     };
 
     Oasis::Multiply logOfExpResult {
         Oasis::Variable { "x" },
         Oasis::Log {
             Oasis::Real { 5.0 },
-            Oasis::Variable { "x" }
-        }
+            Oasis::Variable { "x" } }
     };
 
     auto logOfExp_Simplified = logOfExp.Simplify();
@@ -146,13 +144,13 @@ TEST_CASE("Sum of logs", "[Log][Add]")
 
     auto logOf4Simplified = dynamic_cast<Oasis::Real&>(*Oasis::Add {
         logOf2,
-        logOf2
-    }.Simplify());
+        logOf2 }
+                                                            .Simplify());
     auto logOf6Simplified = dynamic_cast<Oasis::Real&>(*Oasis::Add {
         logOf2,
-        logOf3
-    }.Simplify());
-    
+        logOf3 }
+                                                            .Simplify());
+
     REQUIRE_THAT(logOf4Simplified.GetValue(), Catch::Matchers::WithinAbs(dynamic_cast<Oasis::Real&>(*logOf4.Simplify()).GetValue(), EPSILON));
     REQUIRE_THAT(logOf6Simplified.GetValue(), Catch::Matchers::WithinAbs(dynamic_cast<Oasis::Real&>(*logOf6.Simplify()).GetValue(), EPSILON));
 }
@@ -179,11 +177,12 @@ TEST_CASE("Difference of logs", "[Log][Subtract]")
     auto logOf2Simplified = Oasis::Subtract {
         logOf4,
         logOf2
-    }.Simplify();
+    }
+                                .Simplify();
     auto logOf3Simplified = dynamic_cast<Oasis::Real&>(*Oasis::Subtract {
         logOf6,
-        logOf2
-    }.Simplify());
+        logOf2 }
+                                                            .Simplify());
 
     REQUIRE(logOf2Simplified->Equals(*(logOf2.Simplify())));
     REQUIRE_THAT(logOf3Simplified.GetValue(), Catch::Matchers::WithinAbs(dynamic_cast<Oasis::Real&>(*(logOf3.Simplify())).GetValue(), EPSILON));
@@ -216,17 +215,19 @@ TEST_CASE("Change of Base", "[Log][Divide]")
     auto logBase2Simplified = Oasis::Divide {
         logOf4,
         logOf2
-    }.Simplify();
+    }
+                                  .Simplify();
     auto logBase3Simplified = dynamic_cast<Oasis::Real&>(*Oasis::Divide {
         logOf6,
-        logOf3
-    }.Simplify());
+        logOf3 }
+                                                              .Simplify());
 
     REQUIRE(logBase2Simplified->Equals(two));
-    REQUIRE_THAT(logBase3Simplified.GetValue(), Catch::Matchers::WithinAbs(dynamic_cast<Oasis::Real&>(*(logBase3.Simplify())).GetValue(), EPSILON)); //PROBLEM
+    REQUIRE_THAT(logBase3Simplified.GetValue(), Catch::Matchers::WithinAbs(dynamic_cast<Oasis::Real&>(*(logBase3.Simplify())).GetValue(), EPSILON)); // PROBLEM
 }
 
-TEST_CASE("Undefined", "[UNDEFINED][UNDEFINED]") {
+TEST_CASE("Undefined", "[UNDEFINED][UNDEFINED]")
+{
     REQUIRE(!Oasis::Undefined().Equals(Oasis::Undefined()));
     REQUIRE(Oasis::Log<Oasis::Real, Oasis::Real>(Oasis::Real(-1.0), Oasis::Real(5.0)).Simplify()->Is<Oasis::Undefined>());
     REQUIRE(Oasis::Log<Oasis::Real, Oasis::Real>(Oasis::Real(5.0), Oasis::Real(-5.0)).Simplify()->Is<Oasis::Undefined>());

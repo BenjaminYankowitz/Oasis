@@ -13,6 +13,12 @@
 #include "Oasis/Log.hpp"
 #include "Oasis/Util.hpp"
 #include <functional>
+TEST_CASE("Specialize add fails for non add", "[Add]")
+{
+    REQUIRE(Oasis::Add<Oasis::Expression>::Specialize(Oasis::Imaginary()) == nullptr);
+    REQUIRE(Oasis::Add<Oasis::Imaginary>::Specialize(Oasis::Imaginary()) == nullptr);
+    REQUIRE(Oasis::Add<Oasis::Real>::Specialize(Oasis::Imaginary()) == nullptr);
+}
 
 TEST_CASE("Addition", "[Add]")
 {
@@ -65,13 +71,14 @@ TEST_CASE("Log Addition", "[Add][Log]")
     REQUIRE(!goalS.Equals(*addFS));
 }
 
-TEST_CASE("Complex Sum", "[Add][Complex]"){
-    Oasis::Add<> addS{Oasis::Util::pairToComp(2,4),Oasis::Util::pairToComp(-1,5),Oasis::Util::pairToComp(9,2),Oasis::Util::pairToComp(3,2)};
+TEST_CASE("Complex Sum", "[Add][Complex]")
+{
+    Oasis::Add<> addS { Oasis::Util::pairToComp(2, 4), Oasis::Util::pairToComp(-1, 5), Oasis::Util::pairToComp(9, 2), Oasis::Util::pairToComp(3, 2) };
     auto Simp = addS.Simplify();
-    auto cast = Oasis::Add<Oasis::Real,Oasis::Multiply<Oasis::Real,Oasis::Imaginary>>::Specialize(*Simp);
-    REQUIRE(cast!=nullptr);
-    REQUIRE(cast->GetMostSigOp().GetValue()==13);
-    REQUIRE(cast->GetLeastSigOp().GetMostSigOp().GetValue()==13);
+    auto cast = Oasis::Add<Oasis::Real, Oasis::Multiply<Oasis::Real, Oasis::Imaginary>>::Specialize(*Simp);
+    REQUIRE(cast != nullptr);
+    REQUIRE(cast->GetMostSigOp().GetValue() == 13);
+    REQUIRE(cast->GetLeastSigOp().GetMostSigOp().GetValue() == 13);
 }
 
 TEST_CASE("Imaginary Add Large Expression", "[Add][Imaginary]")

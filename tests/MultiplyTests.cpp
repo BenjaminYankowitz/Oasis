@@ -178,7 +178,7 @@ TEST_CASE("Variadic Multiply Constructor", "[Multiply]")
         Oasis::Add<> {
             Oasis::Real { 5.0 },
             Oasis::Real { 6.0 },
-                Oasis::Real { 7.0 }}
+            Oasis::Real { 7.0 } }
     };
 
     const Oasis::Real expected { 432.0 };
